@@ -1,0 +1,1150 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+<!-- Settings schema derived from Safe Exam Browser (c) ETH Zurich, IT Services, MPL-2.0 - see https://github.com/lucanenni/seb-web-configurator/blob/main/NOTICE -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SEB Configurator</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600&display=swap">
+<style>
+/* Layout: una colonna stretta per l'uso semplice; la modalità avanzata si apre sotto, a tutta larghezza, in schede. */
+:root {
+  --bg: #f3f5f8;
+  --surface: #ffffff;
+  --fg: #16202e;
+  --muted: #5b6676;
+  --line: #d6dce6;
+  --accent: #1f5fd1;
+  --accent-fg: #ffffff;
+  --accent-soft: #e6eefc;
+  --ok: #17713f;
+  --err: #b3261e;
+  --field: #fbfcfe;
+  --win: #7a4b00;
+  --win-bg: #fdf0d8;
+  --mac: #3b4a8a;
+  --mac-bg: #e7eafb;
+  --ios: #0b6b5b;
+  --ios-bg: #dcf3ee;
+  --font-text: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-head: "Space Grotesk", "Inter", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f151e; --surface: #18202c; --fg: #e8edf5; --muted: #98a3b5;
+    --line: #2b3646; --accent: #6b9bf2; --accent-fg: #0b1220; --accent-soft: #1c2a44;
+    --ok: #5fc58a; --err: #ff8a80; --field: #121a25;
+    --win: #f0c27a; --win-bg: #3a2c12; --mac: #aab8f5; --mac-bg: #232a4a; --ios: #7fd6c4; --ios-bg: #14352f; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f151e; --surface: #18202c; --fg: #e8edf5; --muted: #98a3b5;
+  --line: #2b3646; --accent: #6b9bf2; --accent-fg: #0b1220; --accent-soft: #1c2a44;
+  --ok: #5fc58a; --err: #ff8a80; --field: #121a25;
+  --win: #f0c27a; --win-bg: #3a2c12; --mac: #aab8f5; --mac-bg: #232a4a; --ios: #7fd6c4; --ios-bg: #14352f; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg); color: var(--fg); font: 15px/1.5 var(--font-text);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px;
+}
+main { max-width: 560px; margin: 0 auto; display: grid; gap: 20px; transition: max-width .2s; }
+main.wide { max-width: 980px; }
+h1 { font: 600 26px/1.2 var(--font-head); margin: 0; text-wrap: balance; }
+.lead { margin: 6px 0 0; color: var(--muted); }
+form {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  padding: 22px; display: grid; gap: 20px; min-width: 0;
+}
+label.t { display: block; font-weight: 600; margin-bottom: 6px; }
+.hint { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
+input[type=url], input[type=text], input[type=password], input[type=number], input[type=search], select, textarea {
+  width: 100%; font: inherit; color: var(--fg); background: var(--field);
+  border: 1px solid var(--line); border-radius: 6px; padding: 9px 11px; min-width: 0;
+}
+textarea { min-height: 84px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; }
+input:focus-visible, button:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.check { display: flex; gap: 10px; align-items: flex-start; }
+.check input { margin-top: 4px; width: 16px; height: 16px; accent-color: var(--accent); flex: none; }
+.check span { min-width: 0; }
+.check b { font-weight: 600; display: block; }
+.pw { display: flex; gap: 8px; margin-top: 10px; }
+.ghost {
+  font: inherit; color: var(--fg); background: transparent; border: 1px solid var(--line);
+  border-radius: 6px; padding: 6px 12px; cursor: pointer; white-space: nowrap;
+}
+.ghost:hover { border-color: var(--accent); }
+.ghost.sm { padding: 2px 8px; font-size: 12px; }
+.go {
+  font: 600 15px var(--font-text); color: var(--accent-fg); background: var(--accent);
+  border: 0; border-radius: 6px; padding: 8px 16px; cursor: pointer;
+}
+.go:hover { filter: brightness(1.08); }
+.go:disabled { opacity: .6; cursor: default; }
+#msg { margin: 0; min-height: 1.5em; }
+#msg.ok { color: var(--ok); } #msg.err { color: var(--err); }
+.how { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 22px; }
+.how h2 { font: 600 15px var(--font-head); margin: 0 0 8px; }
+.how ol { margin: 0; padding-left: 20px; color: var(--muted); display: grid; gap: 4px; }
+.how code, .hint code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; color: var(--fg); }
+.toolbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg);
+  display: flex; gap: 10px 16px; flex-wrap: wrap; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid var(--line);
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.tb { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.go { padding: 8px 16px; }
+.lang, .seg { display: flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; flex: none; }
+.lang button, .seg button { font: 500 13px var(--font-text); color: var(--muted); background: transparent; border: 0; padding: 5px 10px; cursor: pointer; }
+.lang button[aria-pressed="true"], .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); }
+
+
+/* modalità avanzata */
+#adv { display: grid; gap: 14px; min-width: 0; }
+.advnote { color: var(--muted); font-size: 13px; margin: 0; }
+.tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.tools input[type=search] { max-width: 320px; }
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+.tab {
+  font: 500 14px var(--font-text); color: var(--muted); background: transparent; border: 1px solid transparent;
+  border-bottom: 0; border-radius: 6px 6px 0 0; padding: 8px 12px; cursor: pointer; margin-bottom: -1px;
+}
+.tab[aria-selected="true"] { color: var(--fg); background: var(--surface); border-color: var(--line); }
+.tab:hover { color: var(--fg); }
+.tab .n { color: var(--accent); font-size: 12px; margin-left: 4px; }
+.panel { display: grid; gap: 0; min-width: 0; }
+.field { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 18px; padding: 10px 0; border-bottom: 1px solid var(--line); align-items: start; }
+.field:last-child { border-bottom: 0; }
+.field .lab { min-width: 0; }
+.field .lab b { font-weight: 500; overflow-wrap: anywhere; }
+.field .lab .k { display: block; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px; color: var(--muted); overflow-wrap: anywhere; }
+.field .lab .tip { display: block; color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+.field .ctl { display: flex; gap: 8px; align-items: center; min-width: 0; }
+.field .ctl input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); }
+.field.mod .lab b::after { content: " ●"; color: var(--accent); font-size: 11px; }
+.badge { display: inline-block; font-size: 11px; border-radius: 4px; padding: 0 6px; margin-left: 6px; vertical-align: 1px; }
+.badge.w { color: var(--win); background: var(--win-bg); }
+.badge.m { color: var(--mac); background: var(--mac-bg); }
+.badge.i { color: var(--ios); background: var(--ios-bg); }
+.sub { font: 600 14px var(--font-head); margin: 18px 0 6px; }
+.rows { display: grid; gap: 10px; }
+.card { border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 8px; background: var(--field); min-width: 0; }
+.card .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px 12px; }
+.card .grid > div { min-width: 0; }
+.card .grid small { display: block; color: var(--muted); font-size: 12px; margin-bottom: 2px; }
+.card .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.card .check { align-items: center; }
+.card .check input { margin: 0; }
+.args { display: grid; gap: 6px; border-top: 1px dashed var(--line); padding-top: 8px; }
+.args .a { display: flex; gap: 8px; align-items: center; }
+.empty { color: var(--muted); font-size: 13px; margin: 0; }
+@media (max-width: 640px) { .field { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: no-preference) { .ghost, .go { transition: filter .15s, border-color .15s; } }
+</style>
+
+<main id="main">
+  <header class="top">
+    <h1 data-i18n="title">Configuratore SEB</h1>
+    <p class="lead" data-i18n-html="lead"></p>
+  </header>
+
+  <div class="toolbar">
+    <div class="tb">
+      <button type="button" class="ghost" id="openbtn" data-i18n="open" data-i18n-title="open_hint"></button>
+      <input id="openfile" type="file" accept=".seb,.txt,application/octet-stream" hidden>
+      <button class="go" id="go" type="submit" form="f" data-i18n="go"></button>
+    </div>
+    <div class="tb">
+      <div class="seg" role="group" aria-label="Mode / Modalità" data-i18n-title="adv_t">
+        <button type="button" data-mode="0" aria-pressed="true" data-i18n="mode_simple"></button>
+        <button type="button" data-mode="1" aria-pressed="false" data-i18n="mode_adv"></button>
+      </div>
+      <div class="lang" role="group" aria-label="Language / Lingua">
+        <button type="button" data-lang="it" aria-pressed="true">IT</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+      <input id="advon" type="checkbox" hidden>
+    </div>
+  </div>
+
+  <div id="loadpw" class="tools" hidden>
+    <input id="loadpwin" type="password" autocomplete="off" data-i18n-ph="loadpw_ph" data-i18n-aria="loadpw_ph" style="max-width:240px">
+    <button type="button" class="ghost" id="loadpwgo" data-i18n="open_go"></button>
+  </div>
+  <p id="msg" role="status" aria-live="polite"></p>
+
+  <form id="f" novalidate>
+    <div>
+      <label class="t" for="url" data-i18n="url_label"></label>
+      <input id="url" data-key="startURL" type="url" inputmode="url" autocomplete="off" placeholder="https://…" required>
+      <p class="hint" data-i18n="url_hint"></p>
+    </div>
+
+    <label class="check" for="full">
+      <input id="full" data-key="browserViewMode" data-kind="full" type="checkbox" checked>
+      <span><b data-i18n="full_b"></b><span data-i18n="full_t"></span></span>
+    </label>
+
+    <div>
+      <label class="check" for="enc">
+        <input id="enc" type="checkbox">
+        <span><b data-i18n="enc_b"></b><span data-i18n="enc_t"></span></span>
+      </label>
+      <div class="pw" id="pwrow">
+        <input id="pw" type="password" autocomplete="off" data-i18n-ph="pw_ph" data-i18n-aria="pw_ph">
+        <button type="button" class="ghost" id="show" aria-pressed="false" data-i18n="show"></button>
+      </div>
+    </div>
+
+    <div>
+      <label class="t" for="quit" data-i18n="quit_label"></label>
+      <input id="quit" data-key="hashedQuitPassword" type="text" autocomplete="off">
+      <p class="hint" data-i18n="quit_hint"></p>
+    </div>
+
+    <p class="hint" style="margin:0" data-i18n="fixed_hint"></p>
+
+    <section id="adv" hidden>
+      <p class="advnote" data-i18n-html="advnote"></p>
+      <div class="tools">
+        <input id="q" type="search" data-i18n-ph="search_ph" data-i18n-aria="search_ph">
+        <button type="button" class="ghost" id="resetall" data-i18n="resetall"></button>
+      </div>
+      <div class="tabs" id="tabs" role="tablist"></div>
+      <div class="panel" id="panel" role="tabpanel"></div>
+    </section>
+  </form>
+
+  <section class="how">
+    <h2 data-i18n="how_h"></h2>
+    <ol>
+      <li data-i18n-html="how1"></li>
+      <li data-i18n-html="how2"></li>
+      <li data-i18n-html="how3"></li>
+    </ol>
+  </section>
+</main>
+
+<script>
+const SCHEMA = {"tabs":[["gen","Generali","General"],["cfg","File","File"],["ui","Interfaccia","Interface"],["br","Browser","Browser"],["dl","Download/Upload","Download/Upload"],["ex","Esame","Exam"],["res","Risorse aggiuntive","Additional resources"],["app","Applicazioni","Applications"],["net","Rete","Network"],["sec","Sicurezza","Security"],["proc","Proctoring e riunioni (Mac)","Proctoring and meetings (Mac)"],["ios","Impostazioni iOS","iOS settings"],["keys","Tasti e funzioni (Windows)","Keys and features (Windows)"]],"items":[{"k":"startURL","tab":"gen","t":"string","d":"https://safeexambrowser.org/start","l":"Start URL"},{"k":"sebServerURL","tab":"gen","t":"string","d":"","l":"Seb Server URL"},{"k":"hashedAdminPassword","tab":"gen","t":"pw","d":"","l":"Administrator password"},{"k":"allowQuit","tab":"gen","t":"bool","d":true,"l":"Allow user to quit SEB"},{"k":"ignoreExitKeys","tab":"gen","t":"bool","d":true,"l":"Ignore exit keys"},{"k":"hashedQuitPassword","tab":"gen","t":"pw","d":"","l":"Quit password"},{"k":"exitKey1","tab":"gen","t":"int","d":2,"l":"Exit Key1","o":[[0,"F1"],[1,"F2"],[2,"F3"],[3,"F4"],[4,"F5"],[5,"F6"],[6,"F7"],[7,"F8"],[8,"F9"],[9,"F10"],[10,"F11"],[11,"F12"]]},{"k":"exitKey2","tab":"gen","t":"int","d":10,"l":"Exit Key2","o":[[0,"F1"],[1,"F2"],[2,"F3"],[3,"F4"],[4,"F5"],[5,"F6"],[6,"F7"],[7,"F8"],[8,"F9"],[9,"F10"],[10,"F11"],[11,"F12"]]},{"k":"exitKey3","tab":"gen","t":"int","d":5,"l":"Exit Key3","o":[[0,"F1"],[1,"F2"],[2,"F3"],[3,"F4"],[4,"F5"],[5,"F6"],[6,"F7"],[7,"F8"],[8,"F9"],[9,"F10"],[10,"F11"],[11,"F12"]]},{"k":"browserMessagingSocket","tab":"gen","t":"string","d":"ws://localhost:8706","l":"Browser Messaging Socket"},{"k":"browserMessagingPingTime","tab":"gen","t":"int","d":120000,"l":"Browser Messaging Ping Time"},{"k":"allowPreferencesWindow","tab":"cfg","t":"bool","d":true,"l":"Allow to open preferences window on client (Mac)"},{"k":"useAsymmetricOnlyEncryption","tab":"cfg","t":"bool","d":false,"l":"Use old asymmetric-only encryption (for SEB < 2.2)"},{"k":"browserViewMode","tab":"ui","t":"int","d":0,"l":"Use browser window","o":[[0,"Use browser window"],[1,"Use full screen mode"]]},{"k":"browserWindowAllowAddressBar","tab":"ui","t":"bool","d":false,"l":"Allow address bar for main window (Win)"},{"k":"newBrowserWindowAllowAddressBar","tab":"ui","t":"bool","d":false,"l":"Allow address bar for additional windows (Win)"},{"k":"mainBrowserWindowWidth","tab":"ui","t":"string","d":"100%","l":"Main Browser Window Width","h":"Window width in pixel or percentage of total screen width."},{"k":"mainBrowserWindowHeight","tab":"ui","t":"string","d":"100%","l":"Main Browser Window Height","h":"Window height in pixel or percentage of total screen height."},{"k":"mainBrowserWindowPositioning","tab":"ui","t":"int","d":1,"l":"Main Browser Window Positioning","h":"Position browser window on the left, right or centered","o":[[0,"Left"],[1,"Center"],[2,"Right"]]},{"k":"enableBrowserWindowToolbar","tab":"ui","t":"bool","d":false,"l":"Enable browser window toolbar"},{"k":"hideBrowserWindowToolbar","tab":"ui","t":"bool","d":false,"l":"Hide toolbar as default (Mac)"},{"k":"showMenuBar","tab":"ui","t":"bool","d":false,"l":"Show menu bar (Mac)","h":"Show the OS X menu bar to allow to access settings like Wi-Fi.","p":"m"},{"k":"showTaskBar","tab":"ui","t":"bool","d":true,"l":"Show taskbar / dock"},{"k":"showSideMenu","tab":"ui","t":"bool","d":true,"l":"Show side menu"},{"k":"taskBarHeight","tab":"ui","t":"int","d":40,"l":"Task Bar Height","h":"Height of SEB dock/taskbar in points/pixels","p":"w"},{"k":"touchOptimized","tab":"ui","t":"bool","d":false,"l":"Touch Optimized","p":"w"},{"k":"enableZoomText","tab":"ui","t":"bool","d":true,"l":"Enable text zoom"},{"k":"enableZoomPage","tab":"ui","t":"bool","d":true,"l":"Enable page zoom"},{"k":"zoomMode","tab":"ui","t":"int","d":0,"l":"Use page zoom","h":"Zoom whole web pages using Ctrl-Mousewheel (Win)","o":[[0,"Use page zoom"],[1,"Use text zoom"]]},{"k":"allowDictionaryLookup","tab":"ui","t":"bool","d":false,"l":"Allow dictionary lookup (Mac)","h":"Allow to use the OS X dictionary lookup using a 3 finger tap","p":"m"},{"k":"showReloadButton","tab":"ui","t":"bool","d":true,"l":"Show reload button","h":"Reloads current web page. Shows warning if enabled in Browser settings tab"},{"k":"showTime","tab":"ui","t":"bool","d":true,"l":"Show time","h":"Show current time"},{"k":"showQRVerifyButton","tab":"ui","t":"bool","d":true,"l":"Show QR verify button","h":"Shows button to display QR code for SEB Verificator","p":"w"},{"k":"showInputLanguage","tab":"ui","t":"bool","d":true,"l":"Show keyboard layout"},{"k":"enableTouchExit","tab":"ui","t":"bool","d":false,"l":"Enable touch exit","h":"SEB can be quit with a swipe down from the upper display edge.","p":"w"},{"k":"oskBehavior","tab":"ui","t":"int","d":2,"l":"Osk Behavior","o":[[0,"Always show"],[1,"Never show"],[2,"Auto show"]],"p":"w"},{"k":"allowDeveloperConsole","tab":"ui","t":"bool","d":false,"l":"Show developer tools in window menu (Win)"},{"k":"browserScreenKeyboard","tab":"ui","t":"bool","d":false,"l":"Browser Screen Keyboard","p":"w"},{"k":"newBrowserWindowByLinkPolicy","tab":"br","t":"int","d":2,"l":"New Browser Window By Link Policy","o":[[0,"Generally block"],[1,"Open in same window"],[2,"Open in new window"]]},{"k":"newBrowserWindowByScriptPolicy","tab":"br","t":"int","d":2,"l":"New Browser Window By Script Policy","o":[[0,"Generally block"],[1,"Open in same window"],[2,"Open in new window"]]},{"k":"newBrowserWindowByLinkBlockForeign","tab":"br","t":"bool","d":false,"l":"block when directing to a different server"},{"k":"newBrowserWindowByScriptBlockForeign","tab":"br","t":"bool","d":false,"l":"New Browser Window By Script Block Foreign"},{"k":"newBrowserWindowByLinkWidth","tab":"br","t":"string","d":"1000","l":"New Browser Window By Link Width","h":"Window width in pixel or percentage of total screen width."},{"k":"newBrowserWindowByLinkHeight","tab":"br","t":"string","d":"100%","l":"New Browser Window By Link Height","h":"Window height in pixel or percentage of total screen height."},{"k":"newBrowserWindowByLinkPositioning","tab":"br","t":"int","d":2,"l":"New Browser Window By Link Positioning","o":[[0,"Left"],[1,"Center"],[2,"Right"]]},{"k":"newBrowserWindowShowURL","tab":"br","t":"int","d":0,"l":"New Browser Window Show URL","h":"For some exam scenarios, you might want to keep URLs secret","o":[[0,"Never"],[1,"Only on load error"],[2,"Before title"],[3,"Always"]]},{"k":"browserWindowShowURL","tab":"br","t":"int","d":0,"l":"Browser Window Show URL","h":"For some exam scenarios, you might want to keep URLs secret","o":[[0,"Never"],[1,"Only on load error"],[2,"Before title"],[3,"Always"]]},{"k":"enablePlugIns","tab":"br","t":"bool","d":true,"l":"Enable plug-ins (Win: only Flash)","p":"w"},{"k":"enableJava","tab":"br","t":"bool","d":false,"l":"Enable Java","p":"w"},{"k":"enableJavaScript","tab":"br","t":"bool","d":true,"l":"Enable JavaScript"},{"k":"blockPopUpWindows","tab":"br","t":"bool","d":false,"l":"Block pop-up windows"},{"k":"allowVideoCapture","tab":"br","t":"bool","d":false,"l":"Allow video capture (webcam)","h":"Allow web applications to access camera (using HMTL 5 APIs)."},{"k":"allowAudioCapture","tab":"br","t":"bool","d":false,"l":"Allow audio capture (microphone)","h":"Allow web applications to access microphone (using HMTL 5 APIs)."},{"k":"allowBrowsingBackForward","tab":"br","t":"bool","d":false,"l":"Allow navigating back/forward in exam"},{"k":"newBrowserWindowNavigation","tab":"br","t":"bool","d":true,"l":"Allow navigating in additional windows"},{"k":"removeBrowserProfile","tab":"br","t":"bool","d":true,"l":"Delete cache when re-configuring or terminating SEB (Win). This setting is ignore"},{"k":"removeLocalStorage","tab":"br","t":"bool","d":false,"l":"Disable local storage (Mac)"},{"k":"enableSebBrowser","tab":"br","t":"bool","d":true,"l":"Use SEB without browser window","p":"w"},{"k":"browserWindowAllowReload","tab":"br","t":"bool","d":true,"l":"Allow reload in exam","h":"Allow reload in the exam window with F5 or reload button (if displayed)"},{"k":"newBrowserWindowAllowReload","tab":"br","t":"bool","d":true,"l":"Allow reload in additional windows","h":"Allow reloading additional windows with F5 or reload button (if displayed)"},{"k":"showReloadWarning","tab":"br","t":"bool","d":true,"l":"Show reload warning in exam","h":"User has to confirm reloading a web page with F5 or reload button"},{"k":"newBrowserWindowShowReloadWarning","tab":"br","t":"bool","d":false,"l":"Show reload warning in additional windows","h":"User has to confirm reloading a web page with F5 or reload button"},{"k":"browserUserAgentWinDesktopMode","tab":"br","t":"int","d":0,"l":"Desktop default:","h":"Zoom whole web pages using Ctrl-Mousewheel (Win)","o":[[0,"Default"],[1,"Custom"]],"p":"w"},{"k":"browserUserAgentWinDesktopModeCustom","tab":"br","t":"string","d":"","l":"Browser User Agent Win Desktop Mode Custom","p":"w"},{"k":"browserUserAgentWinTouchMode","tab":"br","t":"int","d":0,"l":"Touch default:","o":[[0,"Default"],[1,"iPad"],[2,"Custom"]],"p":"w"},{"k":"browserUserAgentWinTouchModeCustom","tab":"br","t":"string","d":"","l":"Browser User Agent Win Touch Mode Custom","p":"w"},{"k":"browserUserAgent","tab":"br","t":"string","d":"","l":"Browser User Agent"},{"k":"browserUserAgentMac","tab":"br","t":"int","d":0,"l":"Default (depends on installed Safari/WebKit version)","o":[[0,"Default"],[1,"Custom"]],"p":"m"},{"k":"browserUserAgentMacCustom","tab":"br","t":"string","d":"","l":"Browser User Agent Mac Custom","p":"m"},{"k":"browserWindowTitleSuffix","tab":"br","t":"string","d":"","l":"Browser Window Title Suffix","h":"This text is appended to the title string of any SEB browser window."},{"k":"allowPDFReaderToolbar","tab":"br","t":"bool","d":false,"l":"Allow toolbar of internal PDF reader (Win). This enables access to the print and"},{"k":"allowFind","tab":"br","t":"bool","d":true,"l":"Allow text search"},{"k":"allowPrint","tab":"br","t":"bool","d":false,"l":"Allow printing of web content (Win). This does not control printing via internal"},{"k":"allowCustomDownUploadLocation","tab":"dl","t":"bool","d":false,"l":"Allow user to select custom download / upload directory"},{"k":"downloadDirectoryOSX","tab":"dl","t":"string","d":"~/Downloads","l":"Download Directory OSX","p":"m"},{"k":"downloadDirectoryWin","tab":"dl","t":"string","d":"","l":"Download Directory Win","p":"w"},{"k":"openDownloads","tab":"dl","t":"bool","d":false,"l":"Open files after downloading"},{"k":"chooseFileToUploadPolicy","tab":"dl","t":"int","d":0,"l":"Choose File To Upload Policy","o":[[0,"Manually with file requester"],[1,"Attempt to upload same file as downloaded before"],[2,"Only allow to upload same file as downloaded before"]]},{"k":"downloadPDFFiles","tab":"dl","t":"bool","d":false,"l":"Download PDF files instead of displaying them inline"},{"k":"allowPDFPlugIn","tab":"dl","t":"bool","d":false,"l":"Allow using Acrobat Reader PDF plugin (insecure! Mac only)"},{"k":"downloadAndOpenSebConfig","tab":"dl","t":"bool","d":true,"l":"Download and open SEB Config Files"},{"k":"backgroundOpenSEBConfig","tab":"dl","t":"bool","d":false,"l":"Background Open SEB Config"},{"k":"useTemporaryDownUploadDirectory","tab":"dl","t":"bool","d":false,"l":"Use temporary download / upload directory"},{"k":"browserShowFileSystemElementPath","tab":"dl","t":"bool","d":true,"l":"Show path of file system elements (Win)"},{"k":"allowDownloads","tab":"dl","t":"bool","d":true,"l":"Allow downloading files"},{"k":"allowUploads","tab":"dl","t":"bool","d":false,"l":"Allow uploading files"},{"k":"examSessionClearCookiesOnEnd","tab":"ex","t":"bool","d":true,"l":"Clear browser session when ending an exam or terminating SEB (prevents deletion o"},{"k":"examSessionClearCookiesOnStart","tab":"ex","t":"bool","d":true,"l":"Clear browser session when starting an exam or starting SEB"},{"k":"sendBrowserExamKey","tab":"ex","t":"bool","d":false,"l":"Use Browser Exam Key and Configuration Key"},{"k":"quitURL","tab":"ex","t":"string","d":"","l":"Quit URL"},{"k":"quitURLConfirm","tab":"ex","t":"bool","d":true,"l":"Ask user to confirm quitting"},{"k":"restartExamURL","tab":"ex","t":"string","d":"","l":"Restart Exam URL","h":"This fully qualified URL is loaded when clicking the back to start button"},{"k":"restartExamUseStartURL","tab":"ex","t":"bool","d":false,"l":"Use Start URL (see General tab)","h":"The back to start button reloads the Start URL"},{"k":"restartExamText","tab":"ex","t":"string","d":"","l":"Restart Exam Text"},{"k":"restartExamPasswordProtected","tab":"ex","t":"bool","d":true,"l":"Protect back to start button with the quit/unlock password"},{"k":"examSessionReconfigureAllow","tab":"ex","t":"bool","d":false,"l":"Allow reconfiguring secure/exam session"},{"k":"examSessionReconfigureConfigURL","tab":"ex","t":"string","d":"","l":"Exam Session Reconfigure Config URL"},{"k":"quitURLRestart","tab":"ex","t":"bool","d":false,"l":"Restart session instead of quitting. To end an active user session, both options"},{"k":"startURLAppendQueryParameter","tab":"ex","t":"bool","d":false,"l":"Allow Query Parameter"},{"k":"monitorProcesses","tab":"app","t":"bool","d":true,"l":"Monitor processes while SEB is running"},{"k":"allowSwitchToApplications","tab":"app","t":"bool","d":false,"l":"Allow switching to third party applications (Mac)"},{"k":"allowFlashFullscreen","tab":"app","t":"bool","d":false,"l":"Allow Flash to switch to fullscreen mode (Mac)","p":"w"},{"k":"enableURLFilter","tab":"net","t":"bool","d":false,"l":"Enable URL Filter"},{"k":"enableURLContentFilter","tab":"net","t":"bool","d":false,"l":"Enable URL Content Filter"},{"k":"URLFilterEnable","tab":"net","t":"bool","d":false,"l":"Activate URL filtering"},{"k":"URLFilterEnableContentFilter","tab":"net","t":"bool","d":false,"l":"Filter also embedded content","h":"If selected, also all embedded resources will be filtered using the filter set."},{"k":"blacklistURLFilter","tab":"net","t":"string","d":"","l":"Blacklist URL Filter"},{"k":"whitelistURLFilter","tab":"net","t":"string","d":"","l":"Whitelist URL Filter"},{"k":"urlFilterTrustedContent","tab":"net","t":"bool","d":false,"l":"Url Filter Trusted Content"},{"k":"urlFilterRegex","tab":"net","t":"bool","d":false,"l":"Url Filter Regex"},{"k":"pinEmbeddedCertificates","tab":"net","t":"bool","d":false,"l":"Pin embedded certificates (Mac)"},{"k":"proxySettingsPolicy","tab":"net","t":"int","d":0,"l":"Use system proxy settings","h":"System proxy settings of the exam client computer are used","o":[[0,"Use system proxy settings"],[1,"Use SEB proxy settings"]]},{"k":"sebServicePolicy","tab":"sec","t":"int","d":1,"l":"Seb Service Policy","h":"Policy that applies when an exam client doesn't have the SEB Service running.","o":[[0,"Allow to run SEB without service"],[1,"Display warning when service is not running"],[2,"Allow to run SEB only with service"]],"p":"w"},{"k":"sebServiceIgnore","tab":"sec","t":"bool","d":true,"l":"Enable SEB Service Component","p":"w"},{"k":"allowVirtualMachine","tab":"sec","t":"bool","d":false,"l":"Allow to run inside virtual machine","p":"m"},{"k":"allowScreenSharing","tab":"sec","t":"bool","d":false,"l":"Allow remote session/screen sharing","h":"Allows Windows remote sessions and macOS screen sharing to be used"},{"k":"enablePrivateClipboard","tab":"sec","t":"bool","d":true,"l":"Use private clipboard (Mac)"},{"k":"createNewDesktop","tab":"sec","t":"bool","d":true,"l":"Create New Desktop","p":"w"},{"k":"killExplorerShell","tab":"sec","t":"bool","d":false,"l":"Disable Explorer Shell","p":"w"},{"k":"enableLogging","tab":"sec","t":"bool","d":true,"l":"Enable logging"},{"k":"allowApplicationLog","tab":"sec","t":"bool","d":false,"l":"Allow access to application log (Win)"},{"k":"showApplicationLogButton","tab":"sec","t":"bool","d":false,"l":"Show log button in taskbar (Win)"},{"k":"logDirectoryOSX","tab":"sec","t":"string","d":"","l":"Log Directory OSX","p":"m"},{"k":"logDirectoryWin","tab":"sec","t":"string","d":"","l":"Log Directory Win","p":"w"},{"k":"allowWlan","tab":"sec","t":"bool","d":false,"l":"Allow Wlan","h":"Allows to reconnect to WiFi networks which have previously been connected to"},{"k":"lockOnMessageSocketClose","tab":"sec","t":"bool","d":true,"l":"Lock On Message Socket Close","p":"w"},{"k":"minMacOSVersion","tab":"sec","t":"int","d":4,"l":"Min Mac OS Version","h":"SEB refuses to run on an older system version","p":"m"},{"k":"enableAppSwitcherCheck","tab":"sec","t":"bool","d":true,"l":"Disable app switcher when starting (Mac)","p":"m"},{"k":"forceAppFolderInstall","tab":"sec","t":"bool","d":true,"l":"Force installation in Applications folder","h":"SEB enforces to be installed in the Applications folder (/Applications)","p":"m"},{"k":"allowUserAppFolderInstall","tab":"sec","t":"bool","d":false,"l":"Allow also user's ~/Applications folder","p":"m"},{"k":"allowSiri","tab":"sec","t":"bool","d":false,"l":"Allow to use Siri","p":"m"},{"k":"allowDictation","tab":"sec","t":"bool","d":false,"l":"Allow to use dictation","p":"m"},{"k":"detectStoppedProcess","tab":"sec","t":"bool","d":true,"l":"Detect when SEB process was stopped","p":"w"},{"k":"allowDisplayMirroring","tab":"sec","t":"bool","d":false,"l":"Allow display mirroring (affects also AirPlay Display)","p":"m"},{"k":"allowedDisplaysMaxNumber","tab":"sec","t":"int","d":1,"l":"Allowed Displays Max Number","p":"m"},{"k":"allowedDisplayBuiltin","tab":"sec","t":"bool","d":true,"l":"Use built-in display","p":"m"},{"k":"allowedDisplayBuiltinEnforce","tab":"sec","t":"bool","d":false,"l":"Allow only internal displays (laptops)","p":"m"},{"k":"allowedDisplaysIgnoreFailure","tab":"sec","t":"bool","d":false,"l":"Ignore errors when validating display configuration (required for use in virtual","p":"m"},{"k":"enableChromeNotifications","tab":"sec","t":"bool","d":false,"l":"Allow notifications from Chrome browsers","p":"w"},{"k":"enableWindowsUpdate","tab":"sec","t":"bool","d":false,"l":"Allow Windows Update to run while SEB is running","p":"w"},{"k":"clipboardPolicy","tab":"sec","t":"int","d":2,"l":"Allow","o":[[0,"Allow"],[1,"Block"],[2,"SEB only"]]},{"k":"disableSessionChangeLockScreen","tab":"sec","t":"bool","d":false,"l":"Disable Session Change Lock Screen","p":"w"},{"k":"enableCursorVerification","tab":"sec","t":"bool","d":true,"l":"Enable cursor verification (Win)","p":"w"},{"k":"enableSessionVerification","tab":"sec","t":"bool","d":true,"l":"Enable session verification (Win)","p":"w"},{"k":"lockScreenBackgroundColor","tab":"sec","t":"string","d":"#ff0000","l":"Lock Screen Background Color","p":"w"},{"k":"allowStickyKeys","tab":"sec","t":"bool","d":false,"l":"Allow to use sticky keys (Win)","p":"w"},{"k":"insideSebEnableSwitchUser","tab":"keys","t":"bool","d":false,"l":"Enable Switch user","h":"Activates the button \"Switch User\"","p":"w"},{"k":"insideSebEnableLockThisComputer","tab":"keys","t":"bool","d":false,"l":"Enable Lock this computer","h":"Activates the button \"Lock this computer\"","p":"w"},{"k":"insideSebEnableChangeAPassword","tab":"keys","t":"bool","d":false,"l":"Enable Change a password","h":"Activates the button \"Change a password...\"","p":"w"},{"k":"insideSebEnableStartTaskManager","tab":"keys","t":"bool","d":false,"l":"Enable Start Task Manager","h":"Activates the button \"Start Task Manager\"","p":"w"},{"k":"insideSebEnableLogOff","tab":"keys","t":"bool","d":false,"l":"Enable Log off","h":"Activates the button \"Log off\"","p":"w"},{"k":"insideSebEnableShutDown","tab":"keys","t":"bool","d":false,"l":"Enable Shut down","h":"Activates the button \"Shutdown\"","p":"w"},{"k":"insideSebEnableEaseOfAccess","tab":"keys","t":"bool","d":false,"l":"Enable Ease of Access","p":"w"},{"k":"insideSebEnableVmWareClientShade","tab":"keys","t":"bool","d":false,"l":"Enable VMware Client Shade","p":"w"},{"k":"insideSebEnableNetworkConnectionSelector","tab":"keys","t":"bool","d":false,"l":"Enable network connection selector","p":"w"},{"k":"setVmwareConfiguration","tab":"keys","t":"bool","d":false,"l":"Set VMware configuration","p":"w"},{"k":"enableFindPrinter","tab":"keys","t":"bool","d":false,"l":"Enable Find Printer in system print dialog","p":"w"},{"k":"hookKeys","tab":"keys","t":"bool","d":true,"l":"Hook keys (Win only)","p":"w"},{"k":"enableEsc","tab":"keys","t":"bool","d":true,"l":"Enable Esc","p":"w"},{"k":"enableCtrlEsc","tab":"keys","t":"bool","d":false,"l":"Enable Ctrl-Esc","p":"w"},{"k":"enableAltEsc","tab":"keys","t":"bool","d":false,"l":"Enable Alt-Esc","p":"w"},{"k":"enableAltTab","tab":"keys","t":"bool","d":true,"l":"Enable Alt-Tab","p":"w"},{"k":"enableAltF4","tab":"keys","t":"bool","d":false,"l":"Enable Alt-F4","p":"w"},{"k":"enableStartMenu","tab":"keys","t":"bool","d":false,"l":"Enable Start Menu","p":"w"},{"k":"enableMiddleMouse","tab":"keys","t":"bool","d":false,"l":"Enable Middle Mouse","p":"w"},{"k":"enableRightMouse","tab":"keys","t":"bool","d":true,"l":"Enable Right Mouse","p":"w"},{"k":"enablePrintScreen","tab":"keys","t":"bool","d":false,"l":"Enable PrintScreen","p":"w"},{"k":"enableAltMouseWheel","tab":"keys","t":"bool","d":false,"l":"Enable Alt-Mousewheel","p":"w"},{"k":"enableInjected","tab":"keys","t":"bool","d":false,"l":"Enable Injected Keys","p":"w"},{"k":"enableF1","tab":"keys","t":"bool","d":true,"l":"Enable F1","p":"w"},{"k":"enableF2","tab":"keys","t":"bool","d":true,"l":"Enable F2","p":"w"},{"k":"enableF3","tab":"keys","t":"bool","d":true,"l":"Enable F3","p":"w"},{"k":"enableF4","tab":"keys","t":"bool","d":true,"l":"Enable F4","p":"w"},{"k":"enableF5","tab":"keys","t":"bool","d":true,"l":"Enable F5","h":"Enable F5 for reloading browser pages.","p":"w"},{"k":"enableF6","tab":"keys","t":"bool","d":true,"l":"Enable F6","p":"w"},{"k":"enableF7","tab":"keys","t":"bool","d":true,"l":"Enable F7","p":"w"},{"k":"enableF8","tab":"keys","t":"bool","d":true,"l":"Enable F8","p":"w"},{"k":"enableF9","tab":"keys","t":"bool","d":true,"l":"Enable F9","p":"w"},{"k":"enableF10","tab":"keys","t":"bool","d":true,"l":"Enable F10","p":"w"},{"k":"enableF11","tab":"keys","t":"bool","d":true,"l":"Enable F11","p":"w"},{"k":"enableF12","tab":"keys","t":"bool","d":true,"l":"Enable F12","p":"w"},{"k":"displayAlwaysOn","tab":"keys","t":"bool","d":true,"l":"Display Always On","p":"w"},{"k":"systemAlwaysOn","tab":"keys","t":"bool","d":true,"l":"System Always On","p":"w"},{"k":"aacDnsPrePinning","tab":"sec","t":"bool","d":true,"l":"Use AAC with DNS pre-pinning","p":"m","h":"On macOS <12.1 DNS lookup doesn't work while in AAC. Pre-pinning resolves all domains from Start URL and URL filter rules before starting AAC to mitigate this bug. This allows to use AAC on macOS 11 - 12.0"},{"k":"accessibilityFeatureAssistiveTouch","tab":"ui","t":"int","d":0,"l":"AssistiveTouch","p":"m","o":[[0,"System Default"],[1,"Enable"],[2,"Disable"]]},{"k":"accessibilityFeatureGrayscaleDisplay","tab":"ui","t":"int","d":0,"l":"Grayscale Display","p":"m","o":[[0,"System Default"],[1,"Enable"],[2,"Disable"]]},{"k":"accessibilityFeatureInvertColors","tab":"ui","t":"int","d":0,"l":"Smart Invert","p":"m","o":[[0,"System Default"],[1,"Enable"],[2,"Disable"]]},{"k":"accessibilityFeatureVoiceOver","tab":"ui","t":"int","d":0,"l":"VoiceOver","p":"m","o":[[0,"System Default"],[1,"Enable"],[2,"Disable"]]},{"k":"accessibilityFeatureZoom","tab":"ui","t":"int","d":0,"l":"Zoom","p":"m","o":[[0,"System Default"],[1,"Enable"],[2,"Disable"]]},{"k":"audioControlEnabled","tab":"ui","t":"bool","d":true,"l":"Audio Control Enabled","p":"m"},{"k":"audioMute","tab":"ui","t":"bool","d":false,"l":"Audio Mute","p":"m"},{"k":"audioSetVolumeLevel","tab":"ui","t":"bool","d":false,"l":"Audio Set Volume Level","p":"m"},{"k":"audioVolumeLevel","tab":"ui","t":"int","d":25,"l":"Audio Volume Level","p":"m"},{"k":"allowedDisplayBuiltinExceptDesktop","tab":"sec","t":"bool","d":true,"l":"Allow desktop Macs","p":"m","h":"Allows to use Macs, which don't have a built-in display (like a Mac Mini or Mac Pro), even if enforcing it is enabled"},{"k":"allowDownUploads","tab":"dl","t":"bool","d":true,"l":"Allow downloading and uploading files (deprecated, start using separate settings below!)","p":"m","h":"Use for downloading exam results or to download/upload files for editing in permitted third party applications. Deprecated setting: start using separate settings for allowing downloads/uploads"},{"k":"allowiOSBetaVersionNumber","tab":"ios","t":"int","d":27,"l":"Allow Running on iOS Beta","p":"i","h":"SEB refuses to run on a major iOS beta version, unless it is allowed here","o":[[0,"None"],[27,"iOS 27"],[28,"> iOS 27"]]},{"k":"allowiOSVersionNumberMajor","tab":"ios","t":"int","d":13,"l":"Major Version Number","p":"i"},{"k":"allowiOSVersionNumberMinor","tab":"ios","t":"int","d":0,"l":"Minor Version Number","p":"i","o":[[0,"0"],[1,"1"],[2,"2"],[3,"3"],[4,"4"],[5,"5"],[6,"6"],[7,"7"],[8,"8"],[9,"9"]]},{"k":"allowiOSVersionNumberPatch","tab":"ios","t":"int","d":0,"l":"Patch Version Number","p":"i","o":[[0,"0"],[1,"1"],[2,"2"],[3,"3"],[4,"4"],[5,"5"],[6,"6"],[7,"7"],[8,"8"],[9,"9"]]},{"k":"allowMacOSVersionNumberCheckFull","tab":"sec","t":"bool","d":false,"l":"Check full macOS version number","p":"m","h":"In addition to major version, check also for allowed minor and patch version number"},{"k":"allowMacOSVersionNumberMajor","tab":"sec","t":"int","d":11,"l":"Allow Mac OS Version Number Major","p":"m"},{"k":"allowMacOSVersionNumberMinor","tab":"sec","t":"int","d":0,"l":"Allow Mac OS Version Number Minor","p":"m"},{"k":"allowMacOSVersionNumberPatch","tab":"sec","t":"int","d":0,"l":"Allow Mac OS Version Number Patch","p":"m"},{"k":"allowOpenAndSavePanel","tab":"app","t":"bool","d":false,"l":"Allow open/save panel","p":"m","h":"When using AAC Assessment Mode, SEB blocks the macOS Open File and Save As panel. Users cannot browse the file system and open files manuall in most permitted apps with AAC Multi App Mode."},{"k":"allowShareSheet","tab":"app","t":"bool","d":false,"l":"Allow share sheet","p":"m","h":"When using AAC Assessment Mode, SEB blocks the macOS share sheet. Users cannot share documents in permitted apps with AAC Multi App Mode."},{"k":"allowScreenCapture","tab":"sec","t":"bool","d":false,"l":"Allow screen capture/recording","p":"m","h":"Allows macOS screen capture (screen shots) and recording (cmd-shift-3/-4/-5)"},{"k":"allowScreenCaptureiOS","tab":"ios","t":"bool","d":false,"l":"Allow iOS screen capture","p":"i","h":"Controls capturing the iOS device screen using AirPlay or a Lightning/USB-C cable"},{"k":"allowSpellCheck","tab":"ui","t":"bool","d":false,"l":"Allow spell checking (Win)","p":"w","h":"Allow using check spelling checking (no longer supported on macOS/iOS)"},{"k":"allowUploadsiOS","tab":"ios","t":"bool","d":false,"l":"Allow uploading photos and files (iOS)","p":"i","h":"Uploading on iOS allows to access camera, the full photo library and iCloud Drive and therefore is insecure!"},{"k":"allowWindowCapture","tab":"sec","t":"bool","d":false,"l":"Allow window capture (screen shots)","p":"m","h":"Shows or hides SEB windows on macOS screen shots (invoked with cmd-shift-3/-4/-5)"},{"k":"autoQuitApplications","tab":"app","t":"bool","d":true,"l":"Automatically quit prohibited applications","p":"m","h":"SEB will attempt to quit prohibited applications automatically but nicely, allowing them to save edited documents"},{"k":"batteryChargeThresholdCritical","tab":"ui","t":"float","d":0.1,"l":"Battery Charge Threshold Critical","p":"m"},{"k":"batteryChargeThresholdLow","tab":"ui","t":"float","d":0.2,"l":"Battery Charge Threshold Low","p":"m"},{"k":"blockScreenShotsLegacy","tab":"sec","t":"bool","d":false,"l":"Block screen shots (Legacy)","p":"m","h":"Use legacy method to block macOS screen shots (invoked with cmd+shift+3/+4/+5). Disable together with enabling settings 'Allow screen capture/recording' and 'Allow window capture (screen shots)' will allow to take screen shots on Mac (use 'Enable Print Screen' in Hooked Keys tab to allow screen shots to be taken on Win)."},{"k":"browserConnectionErrorReload","tab":"br","t":"bool","d":false,"l":"Reload page after connection error","p":"m","h":"In some web applications, retrying to load a failed URL after a connection error causes issues. When enabled, a full page reload is performed instead"},{"k":"browserMediaAutoplay","tab":"br","t":"bool","d":true,"l":"Media autoplay","p":"m","h":"Some video/audio content will start playing without user interaction. Some other content might not be playable without enabling this setting (but will not auto play)"},{"k":"browserMediaAutoplayAudio","tab":"br","t":"bool","d":true,"l":"Audio autoplay","p":"m","h":"Using the modern WebView, audio autoplay can be controlled separately"},{"k":"browserMediaAutoplayVideo","tab":"br","t":"bool","d":true,"l":"Video autoplay","p":"m","h":"Using the modern WebView, video autoplay can be controlled separately"},{"k":"browserMediaCaptureCamera","tab":"br","t":"bool","d":false,"l":"Allow camera capture","p":"m","h":"Allow web sites to access the camera, for WebRTC live streams or still pictures (only in modern WebView and on macOS 11.1/iOS 14.3 or newer)"},{"k":"browserMediaCaptureMicrophone","tab":"br","t":"bool","d":false,"l":"Allow microphone capture","p":"m","h":"Allow web sites to access the microphone, for WebRTC live streams or audio recording (only in modern WebView and on macOS 11.1/iOS 14.3 or newer)"},{"k":"browserMediaCaptureScreen","tab":"br","t":"bool","d":false,"l":"Allow screen capture","p":"m","h":"Allow web sites to capture the screen, for WebRTC live streams or still pictures (only in modern WebView and on macOS 11.1 or newer )"},{"k":"browserUserAgentiOS","tab":"ios","t":"int","d":0,"l":"User Agent","p":"i","o":[[0,"Default"],[1,"Mac Desktop"],[2,"Custom"]]},{"k":"browserUserAgentiOSCustom","tab":"ios","t":"string","d":"","l":"Browser User Agenti OS Custom","p":"i"},{"k":"browserWindowWebViewClassicHideDeprecationNote","tab":"br","t":"bool","d":false,"l":"Disable classic WebView deprecation warning","p":"m","h":"Classic WebView is deprecated on macOS and no longer supported on iOS/iPadOS! The used SEB assessment solution integration/settings might no longer work and need to be updated to support the modern WebView. This warning is displayed on top of browser windows/tabs when settings require the classic WebView. You can disable this warning being displayed, but if you are the vendor of an assessment system which isn't yet compatible with the modern WebView, you need to update your integration now (use SEB Javascript API instead of HTTP header check for BEK/CK, see safeexambrowser.org/developer)."},{"k":"defaultPageZoomLevel","tab":"ui","t":"float","d":1.0,"l":"Default Page Zoom Level","p":"m","h":"Zoom level to use by default on every page"},{"k":"defaultTextZoomLevel","tab":"ui","t":"float","d":1.0,"l":"Default Text Zoom Level","p":"m","h":"Zoom level to use by default on every page. When using the modern WebView, text zoom only works on some (simple) webpages and is only enabled when the page zoom level is 1.0"},{"k":"detectAccessibilityApps","tab":"sec","t":"bool","d":true,"l":"Detect apps with Accessibility Permissions","p":"m","h":"Apps with Accessibility permissions (System Settings / Privacy  Security / Accessibility) are terminated when they are running (except if allowed in Permitted Processes). Requires \"Full Disk Access\" permission"},{"k":"enablePrivateClipboardMacEnforce","tab":"sec","t":"bool","d":true,"l":"Enforce private clipboard (Mac)","p":"m","h":"Enforces the private clipboard in the classic kiosk mode, so contents can only be copy-pasted inside SEB browser windows"},{"k":"enableScreenProctoring","tab":"gen","t":"bool","d":false,"l":"Enable Screen Proctoring","p":"m","h":"Connect to an individually configured SEB Screen Proctoring service. Currently this can only be configured using SEB Server"},{"k":"enableScrollLock","tab":"ios","t":"bool","d":true,"l":"Enable scroll lock (iOS)","p":"i","h":"With the scroll lock button and/or side menu item, web page scrolling, selecting text and the text magnifier can be disabled. This can facilitate using drag-and-drop and drawing question types. (iOS only)"},{"k":"enableRightMouseMac","tab":"br","t":"bool","d":false,"l":"Enable right mouse button","p":"m","h":"Enable to access context menu for Web Inspector in SEB for macOS (use ONLY for debugging). Disable to prevent right mouse button actions/context menu for sharing content (with modern WebView) and in video players"},{"k":"hideWiFiControls","tab":"ui","t":"bool","d":false,"l":"Hide Wi-Fi controls (Mac)","p":"m","h":"Hides the Wi-Fi control in the SEB Dock/Taskbar and from macOS 27 also the one in the menu bar in AAC Assessment Mode"},{"k":"ignoreQuitPassword","tab":"gen","t":"bool","d":false,"l":"Ignore Quit Password","p":"m"},{"k":"jitsiMeetAudioMuted","tab":"proc","t":"bool","d":false,"l":"Audio Initially Muted","p":"m"},{"k":"jitsiMeetAudioOnly","tab":"proc","t":"bool","d":false,"l":"Audio Only","p":"m"},{"k":"jitsiMeetEnable","tab":"proc","t":"bool","d":false,"l":"Enable Jitsi Meet","p":"m"},{"k":"jitsiMeetFeatureFlagChat","tab":"proc","t":"bool","d":false,"l":"Enable Chat","p":"m"},{"k":"jitsiMeetFeatureFlagCloseCaptions","tab":"proc","t":"bool","d":false,"l":"Enable Close Captions","p":"m"},{"k":"jitsiMeetFeatureFlagDisplayMeetingName","tab":"proc","t":"bool","d":false,"l":"Display Meeting Name","p":"m"},{"k":"jitsiMeetFeatureFlagRaiseHand","tab":"proc","t":"bool","d":false,"l":"Enable Raise Hand","p":"m"},{"k":"jitsiMeetFeatureFlagRecording","tab":"proc","t":"bool","d":false,"l":"Jitsi Meet Feature Flag Recording","p":"m"},{"k":"jitsiMeetFeatureFlagTileView","tab":"proc","t":"bool","d":false,"l":"Allow Tile View","p":"m"},{"k":"jitsiMeetReceiveAudio","tab":"proc","t":"bool","d":false,"l":"Receive Audio","p":"m"},{"k":"jitsiMeetReceiveVideo","tab":"proc","t":"bool","d":false,"l":"Receive Video","p":"m"},{"k":"jitsiMeetRoom","tab":"proc","t":"string","d":"","l":"Room","p":"m"},{"k":"jitsiMeetSendAudio","tab":"proc","t":"bool","d":true,"l":"Send Audio","p":"m"},{"k":"jitsiMeetSendVideo","tab":"proc","t":"bool","d":true,"l":"Send Video","p":"m"},{"k":"jitsiMeetServerURL","tab":"proc","t":"string","d":"","l":"Server URL","p":"m"},{"k":"jitsiMeetSubject","tab":"proc","t":"string","d":"","l":"Subject","p":"m"},{"k":"jitsiMeetToken","tab":"proc","t":"string","d":"","l":"Token","p":"m"},{"k":"jitsiMeetUserInfoAvatarURL","tab":"ios","t":"string","d":"","l":"Jitsi Meet User Info Avatar URL","p":"i"},{"k":"jitsiMeetUserInfoDisplayName","tab":"proc","t":"string","d":"","l":"Jitsi Meet User Info Display Name","p":"m"},{"k":"jitsiMeetUserInfoEMail","tab":"proc","t":"string","d":"","l":"Jitsi Meet User Info E Mail","p":"m"},{"k":"jitsiMeetVideoMuted","tab":"proc","t":"bool","d":false,"l":"Video Initially Muted","p":"m"},{"k":"logLevel","tab":"sec","t":"int","d":3,"l":"Log Level","p":"m","o":[[0,"Error"],[1,"Warning"],[2,"Info"],[3,"Debug"],[4,"Verbose"]]},{"k":"lockdownModePolicy","tab":"sec","t":"int","d":0,"l":"Lockdown Mode Policy","p":"m","h":"Automatic Assessment Configuration (AAC) Assessment Mode is available from macOS Monterey 12.1 (and Catalina 10.15.4 / 10.15.6+), from macOS Big Sur 11 with restrictions. It blocks various macOS features (which cannot be allowed optionally, like screen/window capture/sharing/mirroring, Siri, Dictation, Screen Proctoring)"},{"k":"logSendingRequiresAdminPassword","tab":"sec","t":"bool","d":false,"l":"Sending Logs Requires Admin PW","p":"m"},{"k":"mobileAllowInlineMediaPlayback","tab":"ios","t":"bool","d":true,"l":"Allow inline playback on iPad","p":"i","h":"Video content can be played inline on a web page or only in full screen. By disabling this option, HTML5 video players are forced to use the iOS user interface for controlling playback"},{"k":"mobileAllowPictureInPictureMediaPlayback","tab":"ios","t":"bool","d":false,"l":"Allow picture in picture video (iOS)","p":"i","h":"On devices supporting PiP, the video plays in a movable and resizable overlay window. If not running SEB in Single App Mode, PiP video keeps playing even if switching to other apps"},{"k":"mobileAllowQRCodeConfig","tab":"ios","t":"bool","d":false,"l":"Allow QR code config","p":"i","h":"Allows to start an exam or to reconfigure SEB by scanning a QR code with a link to an SEB Config File. Use slider menu, dock button (if enabled in the User Interface Dock sub-pane) or Home screen quick action"},{"k":"mobileAllowSingleAppMode","tab":"ios","t":"bool","d":false,"l":"Allow Single App Mode","p":"i","h":"Use Single App Mode invoked by Classroom, an MDM system or Apple Configurator instead of ASAM/AAC"},{"k":"mobileCompactAllowInlineMediaPlayback","tab":"ios","t":"bool","d":false,"l":"Allow inline playback on iPhone","p":"i","h":"Video content can be played inline on a web page or only in full screen. By disabling this option, HTML5 video players are forced to use the iOS user interface for controlling playback"},{"k":"mobileEnableGuidedAccessLinkTransform","tab":"ios","t":"bool","d":false,"l":"Guided Access Compatibility","p":"i","h":"Transforms specific HTTP requests for clicked links to prevent the 'Guided Access is enabled' message being displayed when clicking all links"},{"k":"mobileEnableASAM","tab":"ios","t":"bool","d":true,"l":"Use Assessment Mode (AAC/ASAM) if available","p":"i","h":"Uses either AAC (for BYOD) or requires device to be supervised and having SEB set as an allowed app to invoke Autonomous Single App Mode (ASAM, which takes priority over AAC)"},{"k":"mobileEnableModernAAC","tab":"ios","t":"bool","d":false,"l":"Use modern AAC API","p":"i","h":"Enable Modern AAC API for Multi App Mode on iPadOS 17.7.1 - 18. On iPadOS 18.1 or newer it is activated automatically if permitted processes for iPadOS are configured."},{"k":"mobileSleepModeLockScreen","tab":"ios","t":"bool","d":true,"l":"Lock screen after sleep mode","p":"i","h":"On devices with iOS <= 12, sleep mode can be activated while in AAC by for example closing an iPad case. Use this option to display a lock screen when the device is woken up"},{"k":"mobileShowSettings","tab":"ios","t":"bool","d":false,"l":"Show settings in app","p":"i","h":"Shows the Edit Settings command in the left slider menu. If this option is enabled in the client configuration, in-app settings will also be available after opening an exam config"},{"k":"mobileShowEditConfigShortcutItem","tab":"ios","t":"bool","d":true,"l":"Show 'Edit Config File' Quick Action","p":"i"},{"k":"mobileStatusBarAppearance","tab":"ios","t":"int","d":1,"l":"Status Bar Appearance","p":"i","h":"Status Bar appearance on devices with FaceID","o":[[0,"None"],[1,"White on Black"],[2,"Black on White"]]},{"k":"mobileStatusBarAppearanceExtended","tab":"ios","t":"int","d":1,"l":"Status Bar (w/FaceID)","p":"i","h":"Status Bar appearance on devices without FaceID","o":[[0,"Inferred"],[1,"White on Black"],[2,"Black on White"],[3,"None - Black"],[4,"None - White"]]},{"k":"mobileSupportedFormFactorsCompact","tab":"ios","t":"bool","d":true,"l":"Mobile Supported Form Factors Compact","p":"i"},{"k":"mobileSupportedFormFactorsNonTelephonyCompact","tab":"ios","t":"bool","d":true,"l":"Mobile Supported Form Factors Non Telephony Compact","p":"i"},{"k":"mobileSupportedFormFactorsRegular","tab":"ios","t":"bool","d":true,"l":"Mobile Supported Form Factors Regular","p":"i"},{"k":"mobileSupportedScreenOrientationsCompactPortrait","tab":"ios","t":"bool","d":true,"l":"Mobile Supported Screen Orientations Compact Portrait","p":"i"},{"k":"mobileSupportedScreenOrientationsCompactPortraitUpsideDown","tab":"ios","t":"bool","d":false,"l":"Mobile Supported Screen Orientations Compact Portrait Upside Down","p":"i"},{"k":"mobileSupportedScreenOrientationsCompactLandscapeLeft","tab":"ios","t":"bool","d":true,"l":"Mobile Supported Screen Orientations Compact Landscape Left","p":"i"},{"k":"mobileSupportedScreenOrientationsCompactLandscapeRight","tab":"ios","t":"bool","d":true,"l":"Mobile Supported Screen Orientations Compact Landscape Right","p":"i"},{"k":"mobileSupportedScreenOrientationsRegularPortrait","tab":"ios","t":"bool","d":true,"l":"Mobile Supported Screen Orientations Regular Portrait","p":"i"},{"k":"mobileSupportedScreenOrientationsRegularPortraitUpsideDown","tab":"ios","t":"bool","d":true,"l":"Mobile Supported Screen Orientations Regular Portrait Upside Down","p":"i"},{"k":"mobileSupportedScreenOrientationsRegularLandscapeLeft","tab":"ios","t":"bool","d":true,"l":"Mobile Supported Screen Orientations Regular Landscape Left","p":"i"},{"k":"mobileSupportedScreenOrientationsRegularLandscapeRight","tab":"ios","t":"bool","d":true,"l":"Mobile Supported Screen Orientations Regular Landscape Right","p":"i"},{"k":"mobilePreventAutoLock","tab":"ios","t":"bool","d":true,"l":"Prevent auto-lock","p":"i","h":"While SEB is running, the display isn't switched off and the device isn't locked"},{"k":"proctoringAIEnable","tab":"proc","t":"bool","d":false,"l":"Enable AI Proctoring","p":"m"},{"k":"proctoringDetectFaceAngleDisplay","tab":"proc","t":"bool","d":true,"l":"Feedback for Candidate","p":"m"},{"k":"proctoringDetectFaceCount","tab":"proc","t":"bool","d":true,"l":"Number of Faces","p":"m"},{"k":"proctoringDetectFaceCountDisplay","tab":"proc","t":"bool","d":true,"l":"Feedback for Candidate","p":"m"},{"k":"proctoringDetectFacePitch","tab":"proc","t":"bool","d":true,"l":"Face Movement Up  Down (Pitch)","p":"m"},{"k":"proctoringDetectFaceYaw","tab":"proc","t":"bool","d":true,"l":"Face Movement Sideways (Yaw)","p":"m"},{"k":"proctoringDetectTalking","tab":"proc","t":"bool","d":true,"l":"Proctoring Detect Talking","p":"m"},{"k":"proctoringDetectTalkingDisplay","tab":"proc","t":"bool","d":true,"l":"Proctoring Detect Talking Display","p":"m"},{"k":"raiseHandButtonShow","tab":"proc","t":"bool","d":true,"l":"Raise Hand Button Show","p":"m"},{"k":"raiseHandButtonAlwaysPromptMessage","tab":"proc","t":"bool","d":false,"l":"Raise Hand Button Always Prompt Message","p":"m"},{"k":"remoteProctoringViewShow","tab":"proc","t":"int","d":0,"l":"Proctoring View Display Policy","p":"m","o":[[0,"Never"],[1,"Allow to Show"],[2,"Allow to Hide"],[3,"Always"]]},{"k":"screenSharingMacEnforceBlocked","tab":"sec","t":"bool","d":false,"l":"Enforce blocking screen sharing on Mac","p":"m","h":"Overrides the original screen sharing setting (on Mac clients)"},{"k":"sebServerFallback","tab":"gen","t":"bool","d":false,"l":"SEB Server Fallback","p":"m","h":"SEB should connect to Start URL and use local settings in case it cannot connect to SEB Server"},{"k":"sebServerFallbackAttemptInterval","tab":"gen","t":"int","d":2000,"l":"Seb Server Fallback Attempt Interval","p":"m"},{"k":"sebServerFallbackAttempts","tab":"gen","t":"int","d":5,"l":"Seb Server Fallback Attempts","p":"m"},{"k":"sebServerFallbackTimeout","tab":"gen","t":"int","d":30000,"l":"Seb Server Fallback Timeout","p":"m"},{"k":"screenProctoringCacheSize","tab":"proc","t":"int","d":500,"l":"Screen Proctoring Cache Size","p":"m"},{"k":"screenProctoringClientId","tab":"proc","t":"string","d":"","l":"Screen Proctoring Client Id","p":"m"},{"k":"screenProctoringClientSecret","tab":"proc","t":"string","d":"","l":"Screen Proctoring Client Secret","p":"m"},{"k":"screenProctoringClientSessionId","tab":"proc","t":"string","d":"","l":"Screen Proctoring Client Session Id","p":"m"},{"k":"screenProctoringGroupId","tab":"proc","t":"string","d":"","l":"Screen Proctoring Group Id","p":"m"},{"k":"screenProctoringImageDownscale","tab":"proc","t":"float","d":1.0,"l":"Screen Proctoring Image Downscale","p":"m"},{"k":"screenProctoringImageFormat","tab":"proc","t":"int","d":0,"l":"Screen Proctoring Image Format","p":"m"},{"k":"screenProctoringImageQuantization","tab":"proc","t":"int","d":0,"l":"Screen Proctoring Image Quantization","p":"m"},{"k":"screenProctoringAACCapturePolicy","tab":"sec","t":"int","d":2,"l":"Screen Proctoring AAC Capture Policy","p":"m","h":"Under AAC (Assessment Mode) the system screen capture returns black, so screen proctoring captures SEB's own windows instead. Choose which windows are captured, or disable using AAC when screen proctoring is enabled.","o":[[0,"Don't use AAC (disable Assessment Mode)"],[1,"Capture active window only"],[2,"Capture all windows (composited)"]]},{"k":"screenProctoringIndicateHealthAndCaching","tab":"gen","t":"bool","d":false,"l":"Indicate health and caching","p":"m","h":"Show server/connection health and caching status in the Dock icon and its tooltip"},{"k":"screenProctoringMetadataActiveAppEnabled","tab":"proc","t":"bool","d":true,"l":"Screen Proctoring Metadata Active App Enabled","p":"m"},{"k":"screenProctoringMetadataURLEnabled","tab":"proc","t":"bool","d":true,"l":"Screen Proctoring Metadata URL Enabled","p":"m"},{"k":"screenProctoringMetadataWindowTitleEnabled","tab":"proc","t":"bool","d":true,"l":"Screen Proctoring Metadata Window Title Enabled","p":"m"},{"k":"screenProctoringServiceURL","tab":"proc","t":"string","d":"","l":"Screen Proctoring Service URL","p":"m"},{"k":"screenProctoringScreenshotMaxInterval","tab":"proc","t":"int","d":5000,"l":"Screen Proctoring Screenshot Max Interval","p":"m"},{"k":"screenProctoringScreenshotMinInterval","tab":"proc","t":"int","d":1000,"l":"Screen Proctoring Screenshot Min Interval","p":"m"},{"k":"showBackToStartButton","tab":"ui","t":"bool","d":true,"l":"Show Back to Start button","p":"m","h":"Shows the Back to Start button, if this feature in configured in the Exam pane"},{"k":"showNavigationButtons","tab":"ios","t":"bool","d":false,"l":"Show navigation buttons (iOS)","p":"i","h":"Shows navigation buttons (back/forward) in the SEB for iOS Dock. Otherwise these buttons are displayed in the browser toolbar (if enabled), or in the side menu."},{"k":"showProctoringViewButton","tab":"proc","t":"bool","d":true,"l":"Show Proctoring Button","p":"m"},{"k":"showQuitButton","tab":"ui","t":"bool","d":true,"l":"Show quit button","p":"m","h":"Shows the Quit SEB/Session Dock button"},{"k":"showScanQRCodeButton","tab":"ios","t":"bool","d":false,"l":"Show scan QR code button (iOS)","p":"i","h":"Shows Dock button which allows to start an exam or to reconfigure SEB by scanning a QR code with a SEB link. The button is only displayed if QR Code Config is enabled in Config File pane and if not running in exam mode"},{"k":"showScrollLockButton","tab":"ios","t":"bool","d":true,"l":"Show scroll lock button (iOS)","p":"i","h":"Shows the scroll lock button in the Dock if the scroll lock feature is enabled (iOS only)"},{"k":"startURLAllowDeepLink","tab":"ex","t":"bool","d":false,"l":"Allow Deep Linking for Exams","p":"m","h":"If using a Universal Link or an indirect seb(s):// link, SEB will search its path hierarchy for config files with this setting"},{"k":"tabFocusesLinks","tab":"br","t":"bool","d":true,"l":"Tab focuses links","p":"m","h":"Pressing the tab key moves focus to the next link and form control. Shift-tab moves focus to the previous control"},{"k":"URLFilterMessage","tab":"net","t":"int","d":0,"l":"Blocked Message","p":"m","h":"Chooses message/symbol which is displayed in the browser window toolbar when a URL isn't allowed","o":[[0,"'URL Blocked!'"],[1,"'✕'"]]},{"k":"zoomAPIKey","tab":"proc","t":"string","d":"","l":"Zoom API Key","p":"m"},{"k":"zoomAudioMuted","tab":"proc","t":"bool","d":false,"l":"Zoom Audio Muted","p":"m"},{"k":"zoomEnable","tab":"proc","t":"bool","d":false,"l":"Zoom Enable","p":"m"},{"k":"zoomFeatureFlagChat","tab":"proc","t":"bool","d":false,"l":"Zoom Feature Flag Chat","p":"m"},{"k":"zoomFeatureFlagCloseCaptions","tab":"proc","t":"bool","d":false,"l":"Zoom Feature Flag Close Captions","p":"m"},{"k":"zoomFeatureFlagRaiseHand","tab":"proc","t":"bool","d":false,"l":"Zoom Feature Flag Raise Hand","p":"m"},{"k":"zoomFeatureFlagTileView","tab":"proc","t":"bool","d":false,"l":"Zoom Feature Flag Tile View","p":"m"},{"k":"zoomMeetingKey","tab":"proc","t":"string","d":"","l":"Zoom Meeting Key","p":"m"},{"k":"zoomReceiveAudio","tab":"proc","t":"bool","d":false,"l":"Zoom Receive Audio","p":"m"},{"k":"zoomReceiveVideo","tab":"proc","t":"bool","d":false,"l":"Zoom Receive Video","p":"m"},{"k":"zoomRoom","tab":"proc","t":"string","d":"","l":"Zoom Room","p":"m"},{"k":"zoomSDKToken","tab":"proc","t":"string","d":"","l":"Zoom SDK Token","p":"m"},{"k":"zoomSendAudio","tab":"proc","t":"bool","d":true,"l":"Zoom Send Audio","p":"m"},{"k":"zoomSendVideo","tab":"proc","t":"bool","d":true,"l":"Zoom Send Video","p":"m"},{"k":"zoomServerURL","tab":"proc","t":"string","d":"","l":"Zoom Server URL","p":"m"},{"k":"zoomSubject","tab":"proc","t":"string","d":"","l":"Zoom Subject","p":"m"},{"k":"zoomToken","tab":"proc","t":"string","d":"","l":"Zoom Token","p":"m"},{"k":"zoomUserInfoDisplayName","tab":"proc","t":"string","d":"","l":"Zoom User Info Display Name","p":"m"},{"k":"zoomUserName","tab":"proc","t":"string","d":"","l":"Zoom User Name","p":"m"},{"k":"zoomVideoMuted","tab":"proc","t":"bool","d":false,"l":"Zoom Video Muted","p":"m"}],"presetBase":["Chrome.exe","Chromium.exe","Vivaldi.exe","Opera.exe","browser.exe","slimjet.exe","UCBrowser.exe","CamRecorder.exe","Firefox.exe"],"presetStrict":["Skype.exe","SkypeApp.exe","SkypeHost.exe","GotoMeetingWinStore.exe","TeamViewer.exe","TeamViewer_Desktop.exe","TeamViewer_Service.exe","tv_w32.exe","tv_x64.exe","vncserver.exe","vncviewer.exe","vncserverui.exe","chromoting.exe","Mikogo-host.exe","AeroAdmin.exe","beamyourscreen-host.exe","RemotePCDesktop.exe","RPCService.exe","RPCSuite.exe","Discord.exe","DiscordPTB.exe","DiscordCanary.exe","Camtasia.exe","CamtasiaStudio.exe","Camtasia_Studio.exe","CamPlay.exe","CamRecorder.exe","CamtasiaUtl.exe","slack.exe","Element.exe","Zoom.exe","Telegram.exe","g2mcomm.exe","g2mlauncher.exe","g2mstart.exe","join.me.exe","join.me.sentinel.exe","Teams.exe","MS-Teams.exe","webexmta.exe","ptoneclk.exe","AA_v3.exe","CiscoCollabHost.exe","CiscoWebExStart.exe","remoting_host.exe","SRServer.exe","strwinclt.exe","PCMonitorSrv.exe","pcmontask.exe","obs64.exe","obs32.exe","spotify.exe","Microsoft.Media.Player.exe","vlc.exe","sethc.exe","Guilded.exe","AnyDesk.exe","rustdesk.exe","remote_assistance_host.exe","remoting_native_messaging_host.exe","MouseWithoutBorders.exe","MouseWithoutBordersHelper.exe","mstsc.exe","ToDesk.exe","AA.exe","barrier.exe","ConnectWiseControl.Client.exe","dwagent.exe","g2ax_user.exe","ISLAlwaysOn.exe","ISLLight.exe","LogMeIn.exe","Loom.exe","Moonlight.exe","NinjaRMMAgent.exe","nxclient.exe","nxplayer.exe","parsecd.exe","quickassist.exe","Radmin.exe","rfusclient.exe","rserver3.exe","rutserv.exe","ScreenConnect.Client.exe","ScreenConnect.Service.exe","SplashtopStreamer.exe","Supremo.exe","SupremoHelper.exe","SupremoService.exe","synergyc.exe","tvnserver.exe","tvnviewer.exe","winvnc.exe","UltraViewer_Desktop.exe","UltraViewer_Service.exe"]};
+
+/* ---- core ---- */
+const enc8 = new TextEncoder();
+
+function esc(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+async function sha256hex(s) {
+  const h = new Uint8Array(await crypto.subtle.digest("SHA-256", enc8.encode(s)));
+  return Array.from(h, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/* Un link di modifica (/edit) apre l'editor: per gli studenti serve /viewform. */
+function toViewForm(href) {
+  const u = new URL(href);
+  if (u.hostname === "docs.google.com" && /^\/forms\/d\/[^/]+\/edit\/?$/.test(u.pathname)) {
+    u.pathname = u.pathname.replace(/\/edit\/?$/, "/viewform");
+    u.search = ""; u.hash = "";
+  }
+  return u.href;
+}
+
+/* Serializza un valore in formato plist. type "float" forza <real>. */
+function ser(v, type, pad) {
+  pad = pad || "";
+  if (typeof v === "boolean") return v ? "<true/>" : "<false/>";
+  if (typeof v === "number") return type === "float" || !Number.isInteger(v) ? `<real>${v}</real>` : `<integer>${v}</integer>`;
+  if (v && v.__raw !== undefined) return v.__raw;
+  if (Array.isArray(v)) {
+    if (!v.length) return "<array/>";
+    return "<array>\n" + v.map((x) => pad + "\t" + ser(x, null, pad + "\t")).join("\n") + "\n" + pad + "</array>";
+  }
+  if (v && typeof v === "object") {
+    const ks = Object.keys(v);
+    if (!ks.length) return "<dict/>";
+    return "<dict>\n" + ks.map((k) => `${pad}\t<key>${esc(k)}</key>\n${pad}\t${ser(v[k], null, pad + "\t")}`).join("\n") + "\n" + pad + "</dict>";
+  }
+  return `<string>${esc(v)}</string>`;
+}
+
+/* entries: [[chiave, valore, tipo?], ...] */
+function plistDoc(entries) {
+  return '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n' +
+    '<plist version="1.0">\n<dict>\n' +
+    entries.map(([k, v, t]) => `\t<key>${esc(k)}</key>\n\t${ser(v, t, "\t")}`).join("\n") +
+    '\n</dict>\n</plist>\n';
+}
+
+async function gzip(bytes) {
+  const cs = new CompressionStream("gzip");
+  const w = cs.writable.getWriter();
+  w.write(bytes); w.close();
+  return new Uint8Array(await new Response(cs.readable).arrayBuffer());
+}
+
+function concat(...parts) {
+  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let o = 0;
+  for (const p of parts) { out.set(p, o); o += p.length; }
+  return out;
+}
+
+async function deriveKey(pw, salt, usage, alg) {
+  const base = await crypto.subtle.importKey("raw", enc8.encode(pw), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt, iterations: 10000, hash: "SHA-1" },
+    base, alg, false, usage);
+}
+
+/* RNCryptor v3, modalità password: 03 01 | salt cifratura 8 | salt HMAC 8 | IV 16 | dati AES-256-CBC | HMAC-SHA256 32 */
+async function rnEncrypt(data, pw) {
+  const encSalt = crypto.getRandomValues(new Uint8Array(8));
+  const hmacSalt = crypto.getRandomValues(new Uint8Array(8));
+  const iv = crypto.getRandomValues(new Uint8Array(16));
+  const encKey = await deriveKey(pw, encSalt, ["encrypt"], { name: "AES-CBC", length: 256 });
+  const hmacKey = await deriveKey(pw, hmacSalt, ["sign"], { name: "HMAC", hash: "SHA-256", length: 256 });
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-CBC", iv }, encKey, data));
+  const head = concat(new Uint8Array([3, 1]), encSalt, hmacSalt, iv);
+  const body = concat(head, ct);
+  const mac = new Uint8Array(await crypto.subtle.sign("HMAC", hmacKey, body));
+  return concat(body, mac);
+}
+
+async function gunzip(bytes) {
+  const ds = new DecompressionStream("gzip");
+  const w = ds.writable.getWriter();
+  w.write(bytes); w.close();
+  return new Uint8Array(await new Response(ds.readable).arrayBuffer());
+}
+const isGz = (b) => b.length > 2 && b[0] === 0x1f && b[1] === 0x8b;
+
+async function rnDecrypt(data, pw) {
+  if (data.length < 66 || data[0] !== 3) throw { code: "format" };
+  try {
+    const encSalt = data.slice(2, 10), hmacSalt = data.slice(10, 18), iv = data.slice(18, 34);
+    const ct = data.slice(34, data.length - 32), mac = data.slice(data.length - 32);
+    const hk = await deriveKey(pw, hmacSalt, ["verify"], { name: "HMAC", hash: "SHA-256", length: 256 });
+    if (!(await crypto.subtle.verify("HMAC", hk, mac, data.slice(0, data.length - 32)))) throw 0;
+    const ek = await deriveKey(pw, encSalt, ["decrypt"], { name: "AES-CBC", length: 256 });
+    return new Uint8Array(await crypto.subtle.decrypt({ name: "AES-CBC", iv }, ek, ct));
+  } catch (e) { throw { code: "password" }; }
+}
+
+/* Legge un .seb: gzip esterno, prefisso di 4 caratteri, eventuale cifratura con password, gzip interno. */
+async function readSeb(bytes, pw) {
+  let b = isGz(bytes) ? await gunzip(bytes) : bytes;
+  const pre = new TextDecoder().decode(b.slice(0, 4));
+  let enc = false;
+  if (pre === "pswd" || pre === "pwcc") {
+    if (pw == null) throw { code: "need-password" };
+    enc = true;
+    const body = b.slice(4);
+    try { b = await rnDecrypt(body, pre === "pwcc" ? await sha256hex(pw) : pw); }
+    catch (e) { if (pre === "pwcc" && e.code === "password") b = await rnDecrypt(body, pw); else throw e; }
+  } else if (pre === "pkhs") throw { code: "cert" };
+  else if (pre === "plnd") b = b.slice(4);
+  if (isGz(b)) b = await gunzip(b);
+  const xml = new TextDecoder().decode(b);
+  if (!xml.includes("<plist")) throw { code: "format" };
+  return { xml, enc };
+}
+
+async function makeSeb(entries, password) {
+  const inner = await gzip(enc8.encode(plistDoc(entries)));
+  if (!password) return inner;
+  const enc = await rnEncrypt(inner, password);
+  return gzip(concat(enc8.encode("pswd"), enc));
+}
+/* ---- fine core ---- */
+
+const $ = (id) => document.getElementById(id);
+
+/* ---- lingua / language ---- */
+const I18N = {
+  it: {
+    title: "Configuratore SEB",
+    lead: "Crea il file <code>.seb</code> per far svolgere un test online in Safe Exam Browser, per esempio un Google Modulo. Funziona su qualsiasi computer, senza aprire SEB.",
+    open: "Apri un .seb esistente…", loadpw_ph: "Password del file", open_go: "Apri",
+    open_hint: "Per modificare un file creato qui o con SEB. Le password già salvate nel file si mantengono ma non si possono leggere.",
+    url_label: "Link del test", url_hint: "Usa il link che gli studenti aprirebbero normalmente.",
+    full_b: "Avvia a schermo intero", full_t: "Se lo togli, SEB si apre in una finestra.",
+    enc_b: "Proteggi il file con una password", enc_t: "Gli studenti la inseriranno aprendo il file. Il link del test resta illeggibile a chi non la conosce.",
+    pw_ph: "Password d'esame", show: "Mostra", hide: "Nascondi",
+    quit_label: "Password di uscita (facoltativa)",
+    quit_ph: "Senza password, SEB si chiude con Ctrl/Cmd+Q e una conferma",
+    quit_ph_set: "Già impostata nel file: lascia vuoto per mantenerla",
+    quit_hint: "Se la imposti, solo chi la conosce può chiudere SEB prima della fine.",
+    fixed_hint: "Il file impedisce di aprire altre finestre o schede. Il controllo del WiFi è disattivato. Il resto delle impostazioni resta quello predefinito di SEB.",
+    adv_b: "Modalità avanzata", adv_t: "Mostra le impostazioni del configuratore Windows di SEB. Nel file finiscono solo quelle che modifichi.",
+    advnote: 'Etichette e suggerimenti sono quelli del configuratore Windows di SEB (in inglese). Il segno ● indica un valore modificato. Le impostazioni <span class="badge w">Windows</span>, <span class="badge m">Mac</span> o <span class="badge i">iOS</span> valgono solo su quel sistema e sugli altri vengono ignorate.',
+    search_ph: "Cerca un'impostazione", resetall: "Ripristina tutto", go: "Crea il file .seb",
+    how_h: "Come si usa",
+    how1: "Invia <code>esame.seb</code> agli studenti, con la password se l'hai impostata.",
+    how2: "Gli studenti aprono il file con un doppio clic: parte SEB e, dopo la password, il test.",
+    how3: "Per uscire a fine prova: <code>Ctrl+Q</code> su Windows, <code>Cmd+Q</code> su Mac, con la password di uscita se l'hai impostata.",
+    fname: "esame.seb",
+    pw_empty: "Vuota = nessuna password", pw_kept: "Già impostata nel file: lascia vuoto per mantenerla",
+    reset_title: "Ripristina il valore predefinito", reset_aria: (l) => "Ripristina " + l,
+    none_found: "Nessuna impostazione trovata.", empty_list: "Nessun elemento: SEB usa i valori predefiniti.",
+    add_process: "Aggiungi processo", add_rule: "Aggiungi regola", del: "Elimina", add_arg: "+ Argomento",
+    arg_active: "Argomento attivo", arg: "Argomento", arg_remove: "Rimuovi argomento",
+    mode_simple: "Semplice", mode_adv: "Avanzata",
+    note_dltypes: "Tipi di file che SEB per iOS scarica e apre con l'app indicata dal suo identificatore.", add_filetype: "Aggiungi tipo di file",
+    note_additional: "Pagine e documenti aggiuntivi nel menu di SEB. Li usa SEB per macOS: il codice attuale di SEB per Windows non li legge.",
+    note_certs: "Certificati incorporati nel file (SSL, CA, identità). Si accettano .cer, .crt, .der, .pem e .p12.",
+    note_versions: "Versioni di SEB ammesse a svolgere l'esame, come espressioni regolari.",
+    note_urlignore: "Indirizzi che il filtro URL ignora.",
+    note_sebserver: "Impostazioni per collegare SEB a un SEB Server (solo Mac).",
+    add_resource: "Aggiungi risorsa", add_cert: "Aggiungi certificato", lines_hint: "Una per riga",
+    file_choose: "Scegli file…", file_none: "Nessun file", file_clear: "Rimuovi il file", file_text: "Contenuto presente",
+    file_loaded: (n) => `${n} byte incorporati`, sebsrv_inc: "Includi la configurazione SEB Server nel file",
+    note_permitted: "Applicazioni che gli studenti possono usare durante l'esame (oltre a SEB).",
+    note_prohibited: "Processi che SEB chiude o rifiuta di avviare se sono in esecuzione.",
+    note_urlrules: "Con il filtro attivo (URLFilterEnable) SEB carica solo gli indirizzi consentiti. Ricorda che il login Google usa più domini.",
+    preset_base: "Carica elenco base (browser)", preset_strict: "Aggiungi elenco esteso (chat, remoto, registrazione)",
+    proxy_note: "Usati solo se «Proxy settings policy» è impostata su «Use SEB proxy settings».",
+    proxy_inc: "Includi le impostazioni proxy nel file", proxy_exc: "Exceptions list (una per riga)",
+    m_url: "Inserisci un link completo che inizi con https://", m_pw: "Scrivi una password oppure togli la protezione.",
+    m_saved: (f) => `Salvato come ${f}.`,
+    m_saved_txt: (f) => `Salvato come ${f}.txt: rinominalo togliendo «.txt» finale, così diventa ${f}.`,
+    m_created: (f) => `File ${f} creato.`, m_cancel: "Salvataggio annullato.",
+    m_fail: "Non sono riuscito a creare il file. Riprova con un browser aggiornato.",
+    m_opened: (n) => `File aperto: ${n} impostazioni.`,
+    m_purpose: " Attenzione: è un file per configurare il client, non per avviare un esame.",
+    m_needpw: "Il file è cifrato: inserisci la password e premi Apri.", m_badpw: "Password errata.",
+    m_cert: "Il file è cifrato con un certificato: non è supportato.",
+    m_badfile: "Non riesco a leggere il file: non sembra un .seb valido.",
+  },
+  en: {
+    title: "SEB Configurator",
+    lead: "Create the <code>.seb</code> file to run an online test in Safe Exam Browser, such as a Google Form. Works on any computer, without opening SEB.",
+    open: "Open an existing .seb…", loadpw_ph: "File password", open_go: "Open",
+    open_hint: "To edit a file made here or with SEB. Passwords already stored in the file are kept but cannot be read.",
+    url_label: "Test link", url_hint: "Use the link students would normally open.",
+    full_b: "Start in full screen", full_t: "If you clear it, SEB opens in a window.",
+    enc_b: "Protect the file with a password", enc_t: "Students enter it when opening the file. The test link stays unreadable to anyone who doesn't know it.",
+    pw_ph: "Exam password", show: "Show", hide: "Hide",
+    quit_label: "Quit password (optional)",
+    quit_ph: "Without a password, SEB quits with Ctrl/Cmd+Q and a confirmation",
+    quit_ph_set: "Already set in the file: leave empty to keep it",
+    quit_hint: "If set, only people who know it can quit SEB before the end.",
+    fixed_hint: "The file blocks opening other windows or tabs. WiFi control is turned off. All other settings keep SEB's defaults.",
+    adv_b: "Advanced mode", adv_t: "Shows the settings of SEB's Windows configurator. Only the ones you change end up in the file.",
+    advnote: 'Labels and tooltips come from SEB\'s Windows configurator. The ● mark shows a changed value. Settings marked <span class="badge w">Windows</span>, <span class="badge m">Mac</span> or <span class="badge i">iOS</span> only apply to that system and are ignored on the others.',
+    search_ph: "Search settings", resetall: "Reset all", go: "Create the .seb file",
+    how_h: "How to use it",
+    how1: "Send <code>exam.seb</code> to the students, with the password if you set one.",
+    how2: "Students double-click the file: SEB starts and, after the password, the test opens.",
+    how3: "To quit at the end: <code>Ctrl+Q</code> on Windows, <code>Cmd+Q</code> on Mac, with the quit password if you set one.",
+    fname: "exam.seb",
+    pw_empty: "Empty = no password", pw_kept: "Already set in the file: leave empty to keep it",
+    reset_title: "Restore the default value", reset_aria: (l) => "Restore " + l,
+    none_found: "No settings found.", empty_list: "No items: SEB uses its default values.",
+    add_process: "Add process", add_rule: "Add rule", del: "Delete", add_arg: "+ Argument",
+    arg_active: "Argument active", arg: "Argument", arg_remove: "Remove argument",
+    mode_simple: "Simple", mode_adv: "Advanced",
+    note_dltypes: "File types SEB for iOS downloads and opens with the app given by its identifier.", add_filetype: "Add file type",
+    note_additional: "Additional pages and documents in SEB's menu. Used by SEB for macOS: the current SEB for Windows code does not read them.",
+    note_certs: "Certificates embedded in the file (SSL, CA, identity). Accepts .cer, .crt, .der, .pem and .p12.",
+    note_versions: "SEB versions allowed to take the exam, as regular expressions.",
+    note_urlignore: "Addresses the URL filter ignores.",
+    note_sebserver: "Settings to connect SEB to a SEB Server (Mac only).",
+    add_resource: "Add resource", add_cert: "Add certificate", lines_hint: "One per line",
+    file_choose: "Choose file…", file_none: "No file", file_clear: "Remove the file", file_text: "Content present",
+    file_loaded: (n) => `${n} bytes embedded`, sebsrv_inc: "Include the SEB Server configuration in the file",
+    note_permitted: "Applications students may use during the exam (besides SEB).",
+    note_prohibited: "Processes SEB closes or refuses to start when they are running.",
+    note_urlrules: "With the filter on (URLFilterEnable) SEB loads only allowed addresses. Remember that Google sign-in uses several domains.",
+    preset_base: "Load basic list (browsers)", preset_strict: "Add extended list (chat, remote access, recording)",
+    proxy_note: "Used only if “Proxy settings policy” is set to “Use SEB proxy settings”.",
+    proxy_inc: "Include proxy settings in the file", proxy_exc: "Exceptions list (one per line)",
+    m_url: "Enter a full link starting with https://", m_pw: "Enter a password or turn the protection off.",
+    m_saved: (f) => `Saved as ${f}.`,
+    m_saved_txt: (f) => `Saved as ${f}.txt: rename it by removing the final ".txt" so it becomes ${f}.`,
+    m_created: (f) => `File ${f} created.`, m_cancel: "Save cancelled.",
+    m_fail: "Could not create the file. Try again with an up-to-date browser.",
+    m_opened: (n) => `File opened: ${n} settings.`,
+    m_purpose: " Warning: this file configures the client, it does not start an exam.",
+    m_needpw: "The file is encrypted: enter the password and press Open.", m_badpw: "Wrong password.",
+    m_cert: "The file is encrypted with a certificate: not supported.",
+    m_badfile: "Could not read the file: it doesn't look like a valid .seb.",
+  },
+};
+let LANG = "it";
+try { LANG = localStorage.getItem("seb-cfg-lang") || ""; } catch (e) { LANG = ""; }
+if (!I18N[LANG]) LANG = String(navigator.language || "it").toLowerCase().startsWith("it") ? "it" : "en";
+const t = (k, ...a) => { const v = I18N[LANG][k] !== undefined ? I18N[LANG][k] : I18N.it[k]; return typeof v === "function" ? v(...a) : v; };
+const tabName = (tab) => (LANG === "it" ? tab[1] : tab[2]);
+const msg = (t, cls) => { $("msg").textContent = t; $("msg").className = cls || ""; };
+const BYKEY = Object.fromEntries(SCHEMA.items.map((e) => [e.k, e]));
+
+/* Impostazioni sempre presenti nel file semplice (e valori iniziali della modalità avanzata). */
+const BASE = {
+  sebConfigPurpose: 0, browserViewMode: 1,
+  newBrowserWindowByLinkPolicy: 0, newBrowserWindowByScriptPolicy: 0,
+  allowSwitchToApplications: false, allowWlan: false, insideSebEnableNetworkConnectionSelector: false,
+  hideWiFiControls: true,
+};
+const EXTRA = [];
+
+/* ---- stato ---- */
+const S = {};            // valori scalari per chiave
+const touched = new Set();
+const HASHES = {};       // password già salvate nel file caricato (solo hash)
+let PASSTHRU = [], extraOn = true, PURPOSE = 0;
+
+const LISTS = {
+  permitted: { key: "permittedProcesses", rows: [] },
+  prohibited: { key: "prohibitedProcesses", rows: [] },
+  urlrules: { key: "URLFilterRules", rows: [] },
+  additional: { key: "additionalResources", rows: [] },
+  certs: { key: "embeddedCertificates", rows: [] },
+  dltypes: { key: "downloadFileTypes", rows: [] },
+};
+const STRLISTS = {
+  versions: { key: "sebAllowedVersions", lines: [] },
+  urlignore: { key: "URLFilterIgnoreList", lines: [] },
+};
+const PROXY_PROTOS = ["HTTP", "HTTPS", "FTP", "SOCKS", "RTSP"];
+const PROXY_PORTS = { HTTP: 80, HTTPS: 443, FTP: 21, SOCKS: 1080, RTSP: 554 };
+const PROXY0 = () => {
+  const p = { ExceptionsList: [], ExcludeSimpleHostnames: false, AutoDiscoveryEnabled: false, AutoConfigurationEnabled: false, AutoConfigurationJavaScript: "", AutoConfigurationURL: "", FTPPassive: true };
+  for (const x of PROXY_PROTOS) Object.assign(p, { [x + "Enable"]: false, [x + "Port"]: PROXY_PORTS[x], [x + "Proxy"]: "", [x + "RequiresPassword"]: false, [x + "Username"]: "", [x + "Password"]: "" });
+  return p;
+};
+const PROXY = { v: PROXY0(), on: false };
+const SEBSRV0 = () => ({ institution: "", clientName: "", clientSecret: "", apiDiscovery: "", pingInterval: 1000 });
+const SEBSRV = { v: SEBSRV0(), on: false };
+
+function resetState(applyBase) {
+  for (const e of SCHEMA.items) S[e.k] = e.d;
+  touched.clear();
+  if (applyBase) for (const [k, v] of Object.entries(BASE)) { S[k] = v; touched.add(k); }
+  S.startURL = "";
+  for (const n of Object.keys(LISTS)) LISTS[n].rows = [];
+  for (const n of Object.keys(STRLISTS)) STRLISTS[n].lines = [];
+  PROXY.v = PROXY0(); PROXY.on = false;
+  SEBSRV.v = SEBSRV0(); SEBSRV.on = false;
+  for (const k of Object.keys(HASHES)) delete HASHES[k];
+  PASSTHRU = []; extraOn = applyBase; PURPOSE = 0;
+}
+resetState(true);
+resetState(true);
+
+/* ---- definizione dei campi delle liste ---- */
+/* campo: [chiave, etichetta, tipo, predefinito, opzioni, piattaforma (w = Windows, m = Mac)] */
+const OSOPT = [[0, "macOS"], [1, "Windows"]];
+const OSOPT3 = [[0, "macOS"], [1, "Windows"], [2, "iPadOS"]];
+const LISTDEF = {
+  permitted: {
+    title: "Permitted Processes", addKey: "add_process",
+    fields: [
+      ["active", "Active", "bool", true], ["autostart", "Autostart", "bool", true], ["iconInTaskbar", "Icon in taskbar", "bool", true],
+      ["runInBackground", "Run in background", "bool", false], ["allowUserToChooseApp", "Allow user to choose app", "bool", false],
+      ["strongKill", "Strong kill", "bool", false], ["allowManualStart", "Allow manual start", "bool", true, null, "m"],
+      ["allowAccessibility", "Allow accessibility", "bool", false, null, "m"], ["allowNetworkAccess", "Allow network access", "bool", false, null, "mi"],
+      ["regex", "Regex", "bool", false, null, "m"], ["os", "OS", "enum", 1, OSOPT3],
+      ["title", "Title", "str", ""], ["description", "Description", "str", ""], ["executable", "Executable", "str", ""],
+      ["originalName", "Original name", "str", ""], ["path", "Path / custom scheme (iOS)", "str", ""], ["identifier", "Identifier", "str", ""],
+      ["allowedExecutables", "Allowed executables", "str", "", null, "m"], ["teamIdentifier", "Team identifier", "str", "", null, "m"],
+      ["windowHandlingProcess", "Window handling process", "str", "", null, "w"],
+      ["arguments", "Arguments", "args", null],
+    ],
+  },
+  prohibited: {
+    title: "Prohibited Processes", addKey: "add_process",
+    fields: [
+      ["active", "Active", "bool", true], ["currentUser", "Current user", "bool", true], ["strongKill", "Strong kill", "bool", false],
+      ["ignoreInAAC", "Ignore in AAC", "bool", true, null, "m"],
+      ["os", "OS", "enum", 1, OSOPT], ["executable", "Executable", "str", ""], ["originalName", "Original name", "str", ""],
+      ["description", "Description", "str", ""], ["identifier", "Identifier", "str", ""],
+      ["allowedExecutables", "Allowed executables", "str", "", null, "m"],
+      ["windowHandlingProcess", "Window handling process", "str", "", null, "w"], ["user", "User", "str", ""],
+    ],
+  },
+  urlrules: {
+    title: "URL filter rules", addKey: "add_rule",
+    fields: [
+      ["active", "Active", "bool", true], ["regex", "Regex", "bool", false], ["expression", "Expression", "str", ""],
+      ["action", "Action", "enum", 1, [[0, "Block"], [1, "Allow"], [2, "Ignore"]]],
+    ],
+  },
+  additional: {
+    title: "Additional resources", addKey: "add_resource",
+    fields: [
+      ["active", "Active", "bool", true], ["autoOpen", "Auto open", "bool", false],
+      ["resetSession", "Reset session", "bool", false, null, "w"], ["showButton", "Show button", "bool", false, null, "w"],
+      ["confirm", "Confirm", "bool", false, null, "w"],
+      ["identifier", "Identifier", "str", ""], ["title", "Title", "str", ""], ["URL", "URL", "str", ""],
+      ["linkURL", "Link URL", "str", "", null, "w"], ["refererFilter", "Referer filter", "str", "", null, "w"],
+      ["confirmText", "Confirm text", "str", "", null, "w"], ["key", "Key", "str", "", null, "w"], ["modifiers", "Modifiers", "str", "", null, "w"],
+      ["resourceDataFilename", "Resource data filename", "str", "", null, "w"], ["resourceDataLauncher", "Resource data launcher", "str", "", null, "w"],
+      ["resourceData", "Resource data", "file", ""],
+      ["URLFilterRules", "URL filter rules", "rules", null],
+    ],
+  },
+  dltypes: {
+    title: "File types to be downloaded", addKey: "add_filetype",
+    fields: [
+      ["extension", "File extension", "str", ""],
+      ["os", "OS", "enum", 2, [[0, "macOS"], [1, "Windows"], [2, "iOS"]]],
+      ["associatedAppId", "App identifier", "str", ""],
+    ],
+  },
+  certs: {
+    title: "Embedded certificates", addKey: "add_cert", fileMode: "cert",
+    fields: [
+      ["name", "Name", "str", ""],
+      ["type", "Type", "enum", 0, [[0, "SSL certificate"], [1, "Identity (PKCS#12)"], [2, "CA certificate"], [3, "SSL debug"]]],
+      ["certificateData", "Certificate", "file", ""],
+    ],
+  },
+};
+const newRow = (def) => Object.fromEntries(def.fields.map(([k, , ty, d]) => [k, ty === "args" || ty === "rules" ? [] : d]));
+const isObj = (x) => x && typeof x === "object" && !Array.isArray(x);
+function normRow(def, r) {
+  const row = Object.assign(newRow(def), r);
+  for (const f of def.fields) {
+    if (f[2] === "args") row[f[0]] = Array.isArray(row[f[0]]) ? row[f[0]].filter(isObj).map((a) => ({ active: true, argument: "", ...a })) : [];
+    else if (f[2] === "rules") row[f[0]] = Array.isArray(row[f[0]]) ? row[f[0]].filter(isObj).map((x) => normRow(LISTDEF.urlrules, x)) : [];
+  }
+  return row;
+}
+const ROWKEYS = Object.fromEntries(Object.entries(LISTS).map(([n, l]) => [l.key, n]));
+const STRKEYS = Object.fromEntries(Object.entries(STRLISTS).map(([n, l]) => [l.key, n]));
+
+/* ---- binding dei campi scalari ---- */
+function isDefault(k) { return S[k] === BYKEY[k].d; }
+function fromDom(el, e) {
+  if (el.dataset.kind === "full") return el.checked ? 1 : 0;
+  if (e.t === "bool") return el.checked;
+  if (e.t === "int" || e.t === "float") { const n = el.value === "" ? 0 : Number(el.value); return e.o ? Number(el.value) : (Number.isFinite(n) ? n : 0); }
+  return el.value;
+}
+function toDom(el, e, v) {
+  if (el.dataset.kind === "full") el.checked = v === 1;
+  else if (e.t === "bool") el.checked = !!v;
+  else el.value = v;
+}
+function markRows(k) {
+  const mod = S[k] !== BYKEY[k].d;
+  document.querySelectorAll(`.field[data-fk="${k}"]`).forEach((r) => r.classList.toggle("mod", mod));
+}
+function setVal(k, v, src) {
+  const e = BYKEY[k];
+  S[k] = v;
+  if (k === "startURL" || k === "hashedQuitPassword") { if (v !== "") touched.add(k); else touched.delete(k); }
+  else if (v === e.d && !(k in BASE)) touched.delete(k);
+  else touched.add(k);
+  document.querySelectorAll(`[data-key="${k}"]`).forEach((el) => { if (el !== src) toDom(el, e, v); });
+  markRows(k); updateCounts();
+}
+function resetKey(k) {
+  S[k] = BYKEY[k].d; touched.delete(k); delete HASHES[k];
+  document.querySelectorAll(`[data-key="${k}"]`).forEach((el) => toDom(el, BYKEY[k], S[k]));
+  markRows(k); updateCounts();
+}
+
+/* basic: collega i tre campi semplici */
+for (const id of ["url", "full", "quit"]) {
+  const el = $(id), k = el.dataset.key, e = BYKEY[k] || { t: "str" };
+  el.addEventListener(el.type === "checkbox" ? "change" : "input", () => setVal(k, fromDom(el, e.t === "pw" ? { t: "str" } : e), el));
+}
+
+/* ---- pannello avanzato ---- */
+let curTab = SCHEMA.tabs[0][0];
+const modCount = (tab) => SCHEMA.items.filter((e) => e.tab === tab && touched.has(e.k) && S[e.k] !== e.d).length;
+function listMod(tab) {
+  const n = (names) => names.reduce((a, x) => a + LISTS[x].rows.length, 0);
+  if (tab === "app") return n(["permitted", "prohibited"]);
+  if (tab === "net") return n(["urlrules", "certs"]) + (PROXY.on ? 1 : 0) + (STRLISTS.urlignore.lines.length ? 1 : 0);
+  if (tab === "res") return n(["additional"]);
+  if (tab === "sec") return STRLISTS.versions.lines.length ? 1 : 0;
+  if (tab === "gen") return SEBSRV.on ? 1 : 0;
+  if (tab === "ios") return n(["dltypes"]);
+  return 0;
+}
+function updateCounts() {
+  document.querySelectorAll(".tab").forEach((b) => {
+    const n = modCount(b.dataset.tab) + listMod(b.dataset.tab);
+    b.querySelector(".n").textContent = n ? n : "";
+  });
+}
+
+function badge(e) { return e.p === "w" ? ' <span class="badge w">Windows</span>' : e.p === "m" ? ' <span class="badge m">Mac</span>' : e.p === "i" ? ' <span class="badge i">iOS</span>' : ""; }
+
+function fieldEl(e) {
+  const row = document.createElement("div");
+  row.className = "field"; row.dataset.fk = e.k;
+  row.dataset.search = (e.l + " " + e.k + " " + (e.h || "")).toLowerCase();
+  const lab = document.createElement("div"); lab.className = "lab";
+  const id = "k_" + e.k;
+  lab.innerHTML = `<label for="${id}"><b>${esc(e.l)}</b>${badge(e)}</label><span class="k">${esc(e.k)}</span>` + (e.h ? `<span class="tip">${esc(e.h)}</span>` : "");
+  const ctl = document.createElement("div"); ctl.className = "ctl";
+  let inp;
+  if (e.o) {
+    inp = document.createElement("select");
+    for (const [v, t] of e.o) inp.add(new Option(t, v));
+    inp.value = S[e.k];
+  } else if (e.t === "bool") {
+    inp = document.createElement("input"); inp.type = "checkbox"; inp.checked = !!S[e.k];
+  } else if (e.t === "int" || e.t === "float") {
+    inp = document.createElement("input"); inp.type = "number"; inp.step = e.t === "float" ? "any" : "1"; inp.value = S[e.k];
+  } else {
+    inp = document.createElement("input"); inp.type = "text"; inp.value = S[e.k];
+    if (e.t === "pw") inp.placeholder = HASHES[e.k] ? t("pw_kept") : t("pw_empty");
+    inp.autocomplete = "off";
+  }
+  inp.id = id; inp.dataset.key = e.k;
+  inp.addEventListener(inp.type === "checkbox" || inp.tagName === "SELECT" ? "change" : "input", () => {
+    setVal(e.k, fromDom(inp, e), inp);
+  });
+  const rs = document.createElement("button"); rs.type = "button"; rs.className = "ghost sm"; rs.textContent = "↺"; rs.title = t("reset_title");
+  rs.setAttribute("aria-label", t("reset_aria", e.l));
+  rs.addEventListener("click", () => resetKey(e.k));
+  ctl.append(inp, rs); row.append(lab, ctl);
+  if (S[e.k] !== e.d) row.classList.add("mod");
+  return row;
+}
+
+/* editor di liste di record */
+function inputFor(type, val, opts, onChange, label) {
+  let el;
+  if (type === "bool") { el = document.createElement("input"); el.type = "checkbox"; el.checked = !!val; el.addEventListener("change", () => onChange(el.checked)); }
+  else if (type === "enum") { el = document.createElement("select"); for (const [v, tx] of opts) el.add(new Option(tx, v)); el.value = val; el.addEventListener("change", () => onChange(Number(el.value))); }
+  else if (type === "int") { el = document.createElement("input"); el.type = "number"; el.value = val; el.addEventListener("input", () => onChange(Number(el.value) || 0)); }
+  else { el = document.createElement("input"); el.type = "text"; el.value = val; el.autocomplete = "off"; el.addEventListener("input", () => onChange(el.value)); }
+  if (label) el.setAttribute("aria-label", label);
+  return el;
+}
+const mkBtn = (text, cls, fn) => { const b = document.createElement("button"); b.type = "button"; b.className = cls; b.textContent = text; b.addEventListener("click", fn); return b; };
+const mkSmall = (text) => { const s = document.createElement("small"); s.textContent = text; return s; };
+const platTag = (pf) => (pf === "w" ? " (Windows)" : pf === "m" ? " (Mac)" : pf === "i" ? " (iOS)" : pf === "mi" ? " (Mac, iOS)" : "");
+
+function toB64(bytes) {
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+/* campo "file": incorpora i byte come <data> base64; i certificati PEM vengono convertiti in DER */
+function fileField(row, k, label, mode) {
+  const d = document.createElement("div"), line = document.createElement("div");
+  line.className = "row";
+  const inp = document.createElement("input"); inp.type = "file"; inp.hidden = true;
+  if (mode === "cert") inp.accept = ".cer,.crt,.der,.pem,.p12,.pfx";
+  const info = document.createElement("span"); info.className = "hint"; info.style.margin = "0";
+  const upd = () => {
+    const v = row[k], m = v && v.__raw ? v.__raw.match(/^<data[^>]*>([\s\S]*)<\/data>$/) : null;
+    info.textContent = m ? t("file_loaded", Math.floor(m[1].replace(/\s/g, "").length * 3 / 4)) : (typeof v === "string" && v ? t("file_text") : t("file_none"));
+  };
+  inp.addEventListener("change", async () => {
+    const f = inp.files[0]; inp.value = "";
+    if (!f) return;
+    const bytes = new Uint8Array(await f.arrayBuffer());
+    const pem = mode === "cert" ? new TextDecoder().decode(bytes).match(/-----BEGIN CERTIFICATE-----([\s\S]*?)-----END CERTIFICATE-----/) : null;
+    row[k] = { __raw: `<data>${pem ? pem[1].replace(/\s+/g, "") : toB64(bytes)}</data>` };
+    upd();
+  });
+  const pick = mkBtn(t("file_choose"), "ghost sm", () => inp.click());
+  const clr = mkBtn("✕", "ghost sm", () => { row[k] = ""; upd(); }); clr.setAttribute("aria-label", t("file_clear"));
+  line.append(pick, info, clr, inp); upd();
+  d.append(mkSmall(label), line);
+  return d;
+}
+
+/* elenco di record con aggiunta ed eliminazione; usato anche per le regole annidate */
+function rowsUI(rows, def, opts) {
+  opts = opts || {};
+  const wrap = document.createElement("div");
+  const box = document.createElement("div"); box.className = "rows";
+  const bar = document.createElement("div"); bar.className = "tools"; bar.style.marginTop = "8px";
+  function draw() {
+    box.textContent = "";
+    if (!rows.length) { const p = document.createElement("p"); p.className = "empty"; p.textContent = t("empty_list"); box.append(p); }
+    rows.forEach((r, i) => {
+      const card = document.createElement("div"); card.className = "card";
+      const grid = document.createElement("div"); grid.className = "grid";
+      const flags = document.createElement("div"); flags.className = "row";
+      for (const [k, lbl, ty, , o, pf] of def.fields) {
+        if (ty === "args" || ty === "rules") continue;
+        if (ty === "bool") {
+          const l = document.createElement("label"); l.className = "check";
+          l.append(inputFor("bool", r[k], null, (v) => { r[k] = v; }), document.createTextNode(lbl + platTag(pf)));
+          flags.append(l);
+        } else if (ty === "file") {
+          grid.append(fileField(r, k, lbl + platTag(pf), def.fileMode));
+        } else {
+          const d = document.createElement("div");
+          d.append(mkSmall(lbl + platTag(pf)), inputFor(ty, r[k], o, (v) => { r[k] = v; }, lbl)); grid.append(d);
+        }
+      }
+      card.append(flags, grid);
+      for (const [k, lbl, ty] of def.fields) {
+        if (ty === "args") {
+          const args = document.createElement("div"); args.className = "args";
+          args.append(mkSmall(lbl));
+          r[k].forEach((a, j) => {
+            const line = document.createElement("div"); line.className = "a";
+            line.append(inputFor("bool", a.active, null, (v) => { a.active = v; }, t("arg_active")), inputFor("str", a.argument, null, (v) => { a.argument = v; }, t("arg")));
+            const x = mkBtn("✕", "ghost sm", () => { r[k].splice(j, 1); draw(); }); x.setAttribute("aria-label", t("arg_remove"));
+            line.append(x); args.append(line);
+          });
+          const ab = mkBtn(t("add_arg"), "ghost sm", () => { r[k].push({ active: true, argument: "" }); draw(); }); ab.style.justifySelf = "start";
+          args.append(ab); card.append(args);
+        } else if (ty === "rules") {
+          const sub = document.createElement("div"); sub.className = "args";
+          sub.append(mkSmall(lbl), rowsUI(r[k], LISTDEF.urlrules)); card.append(sub);
+        }
+      }
+      const del = mkBtn(t("del"), "ghost sm", () => { rows.splice(i, 1); draw(); }); del.style.justifySelf = "start";
+      card.append(del); box.append(card);
+    });
+    updateCounts();
+  }
+  bar.append(mkBtn("+ " + t(def.addKey), "ghost", () => { rows.push(newRow(def)); draw(); }));
+  if (opts.presets) {
+    for (const [lbl, key] of [[t("preset_base"), "presetBase"], [t("preset_strict"), "presetStrict"]]) {
+      bar.append(mkBtn(lbl, "ghost", () => {
+        for (const ex of SCHEMA[key]) if (!rows.some((r) => String(r.executable).toLowerCase() === ex.toLowerCase())) rows.push({ ...newRow(def), executable: ex, originalName: ex });
+        draw();
+      }));
+    }
+  }
+  wrap.append(box, bar); draw();
+  return wrap;
+}
+
+function sectionHead(wrap, name, title) {
+  wrap.dataset.list = name;
+  const h = document.createElement("h3"); h.className = "sub"; h.textContent = title;
+  const note = document.createElement("p"); note.className = "hint"; note.textContent = t("note_" + name);
+  wrap.append(h, note);
+  wrap.dataset.search = (title + " " + name + " " + note.textContent + " " + (LISTTEXT[name] || "")).toLowerCase();
+}
+
+function listEditor(name) {
+  const def = LISTDEF[name], wrap = document.createElement("div");
+  sectionHead(wrap, name, def.title);
+  wrap.append(rowsUI(LISTS[name].rows, def, { presets: name === "prohibited" }));
+  return wrap;
+}
+
+function strListEditor(name) {
+  const L = STRLISTS[name], wrap = document.createElement("div");
+  sectionHead(wrap, name, name === "versions" ? "Allowed SEB versions" : "URL filter ignore list");
+  const ta = document.createElement("textarea"); ta.value = L.lines.join("\n"); ta.setAttribute("aria-label", t("lines_hint"));
+  ta.addEventListener("input", () => { L.lines = ta.value.split("\n").map((x) => x.trim()).filter(Boolean); updateCounts(); });
+  wrap.append(mkSmall(t("lines_hint")), ta);
+  return wrap;
+}
+
+function sebsrvEditor() {
+  const wrap = document.createElement("div");
+  sectionHead(wrap, "sebserver", "SEB Server configuration");
+  const lab = document.createElement("label"); lab.className = "check";
+  const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = SEBSRV.on;
+  const box = document.createElement("div"); box.className = "card"; box.hidden = !SEBSRV.on;
+  cb.addEventListener("change", () => { SEBSRV.on = cb.checked; box.hidden = !cb.checked; updateCounts(); });
+  lab.append(cb, document.createTextNode(t("sebsrv_inc")));
+  const grid = document.createElement("div"); grid.className = "grid";
+  for (const [k, l, ty] of [["institution", "Institution", "str"], ["clientName", "Client name", "str"], ["clientSecret", "Client secret", "str"], ["apiDiscovery", "API discovery", "str"], ["pingInterval", "Ping interval (ms)", "int"]]) {
+    const d = document.createElement("div"); d.append(mkSmall(l), inputFor(ty, SEBSRV.v[k], null, (v) => { SEBSRV.v[k] = v; }, l)); grid.append(d);
+  }
+  box.append(grid); wrap.append(lab, box);
+  return wrap;
+}
+
+function proxyEditor() {
+  const wrap = document.createElement("div");
+  sectionHead(wrap, "proxies", "Proxies");
+  const lab = document.createElement("label"); lab.className = "check";
+  const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = PROXY.on;
+  const box = document.createElement("div"); box.className = "card"; box.hidden = !PROXY.on;
+  cb.addEventListener("change", () => { PROXY.on = cb.checked; box.hidden = !cb.checked; updateCounts(); });
+  lab.append(cb, document.createTextNode(t("proxy_inc")));
+  const P = PROXY.v;
+  const grid = document.createElement("div"); grid.className = "grid";
+  const bools = document.createElement("div"); bools.className = "row";
+  for (const [k, l] of [["ExcludeSimpleHostnames", "Exclude simple hostnames"], ["AutoDiscoveryEnabled", "Auto discovery"], ["AutoConfigurationEnabled", "Auto configuration"], ["FTPPassive", "FTP passive"]]) {
+    const x = document.createElement("label"); x.className = "check"; x.append(inputFor("bool", P[k], null, (v) => { P[k] = v; }), document.createTextNode(l)); bools.append(x);
+  }
+  for (const [k, l] of [["AutoConfigurationURL", "Auto configuration URL"], ["AutoConfigurationJavaScript", "Auto configuration JavaScript"]]) {
+    const d = document.createElement("div"); d.append(mkSmall(l), inputFor("str", P[k], null, (v) => { P[k] = v; }, l)); grid.append(d);
+  }
+  const ex = document.createElement("div");
+  const ta = document.createElement("textarea"); ta.value = P.ExceptionsList.join("\n");
+  ta.addEventListener("input", () => { P.ExceptionsList = ta.value.split("\n").map((x) => x.trim()).filter(Boolean); });
+  ex.append(mkSmall(t("proxy_exc")), ta);
+  box.append(bools, grid, ex);
+  for (const x of PROXY_PROTOS) {
+    const hd = document.createElement("div"); hd.className = "sub"; hd.style.margin = "10px 0 0"; hd.textContent = x; box.append(hd);
+    const flags = document.createElement("div"); flags.className = "row";
+    for (const [sfx, l] of [["Enable", "Enable"], ["RequiresPassword", "Requires password"]]) {
+      const c = document.createElement("label"); c.className = "check"; c.append(inputFor("bool", P[x + sfx], null, (v) => { P[x + sfx] = v; }), document.createTextNode(l)); flags.append(c);
+    }
+    const g = document.createElement("div"); g.className = "grid";
+    for (const [sfx, l, ty] of [["Proxy", "Host", "str"], ["Port", "Port", "int"], ["Username", "Username", "str"], ["Password", "Password", "str"]]) {
+      const d = document.createElement("div"); d.append(mkSmall(l), inputFor(ty, P[x + sfx], null, (v) => { P[x + sfx] = v; }, x + " " + l)); g.append(d);
+    }
+    box.append(flags, g);
+  }
+  wrap.append(lab, box);
+  return wrap;
+}
+
+const TABLISTS = { gen: ["sebserver"], app: ["permitted", "prohibited"], net: ["urlrules", "certs", "proxies", "urlignore"], res: ["additional"], sec: ["versions"], ios: ["dltypes"] };
+const LISTTEXT = {
+  permitted: "applicazioni consentite allowed applications", prohibited: "processi vietati blocked applications",
+  urlrules: "regole filtro url filter", proxies: "proxy http https ftp socks rtsp", additional: "risorse aggiuntive pagine",
+  certs: "certificati certificates ssl ca identity", versions: "versioni versions restrictions", urlignore: "ignore filtro",
+  sebserver: "seb server institution client", dltypes: "file types tipi di file download ios",
+};
+function listNode(n) {
+  if (n === "proxies") return proxyEditor();
+  if (n === "sebserver") return sebsrvEditor();
+  if (STRLISTS[n]) return strListEditor(n);
+  return listEditor(n);
+}
+function buildPanel(tab) {
+  const p = document.createElement("div");
+  for (const e of SCHEMA.items.filter((x) => x.tab === tab)) p.append(fieldEl(e));
+  for (const n of TABLISTS[tab] || []) p.append(listNode(n));
+  return p;
+}
+function showTab(tab) {
+  curTab = tab;
+  document.querySelectorAll(".tab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
+  $("panel").textContent = ""; $("panel").append(buildPanel(tab));
+}
+function initTabs() {
+  for (const tab of SCHEMA.tabs) {
+    const id = tab[0];
+    const b = document.createElement("button"); b.type = "button"; b.className = "tab"; b.role = "tab"; b.dataset.tab = id;
+    b.innerHTML = `<span class="tn">${esc(tabName(tab))}</span><span class="n"></span>`;
+    b.addEventListener("click", () => { $("q").value = ""; showTab(id); });
+    $("tabs").append(b);
+  }
+  showTab(curTab); updateCounts();
+}
+
+/* ricerca: mostra i campi che corrispondono, da tutte le schede */
+$("q").addEventListener("input", () => {
+  const q = $("q").value.trim().toLowerCase();
+  if (!q) { showTab(curTab); return; }
+  document.querySelectorAll(".tab").forEach((b) => b.setAttribute("aria-selected", "false"));
+  const res = document.createElement("div");
+  let n = 0;
+  for (const e of SCHEMA.items) if ((e.l + " " + e.k + " " + (e.h || "")).toLowerCase().includes(q)) { res.append(fieldEl(e)); n++; }
+  for (const [name, txt] of Object.entries(LISTTEXT)) if (txt.includes(q)) { res.append(listNode(name)); n++; }
+  if (!n) { const p = document.createElement("p"); p.className = "empty"; p.textContent = t("none_found"); res.append(p); }
+  $("panel").textContent = ""; $("panel").append(res);
+});
+
+function refreshAll() {
+  $("url").value = S.startURL;
+  document.querySelectorAll("[data-key]").forEach((el) => { const e = BYKEY[el.dataset.key]; if (e) toDom(el, e, S[el.dataset.key]); });
+  $("quit").placeholder = HASHES.hashedQuitPassword ? t("quit_ph_set") : t("quit_ph");
+  $("q").value = "";
+  if ($("tabs").children.length) showTab(curTab);
+  updateCounts();
+}
+$("resetall").addEventListener("click", () => { const u = S.startURL; resetState(true); S.startURL = u; if (u) touched.add("startURL"); refreshAll(); });
+
+document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {
+  $("advon").checked = b.dataset.mode === "1";
+  $("advon").dispatchEvent(new Event("change"));
+}));
+$("advon").addEventListener("change", () => {
+  const on = $("advon").checked;
+  document.querySelectorAll(".seg button").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.mode === "1") === on)));
+  $("adv").hidden = !on; $("main").classList.toggle("wide", on);
+  if (on && !$("tabs").children.length) initTabs();
+});
+
+/* ---- cambio lingua ---- */
+function applyLang() {
+  document.documentElement.lang = LANG;
+  document.title = t("title");
+  document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-html]").forEach((el) => { el.innerHTML = t(el.dataset.i18nHtml); });
+  document.querySelectorAll("[data-i18n-ph]").forEach((el) => { el.placeholder = t(el.dataset.i18nPh); });
+  document.querySelectorAll("[data-i18n-title]").forEach((el) => { el.title = t(el.dataset.i18nTitle); });
+  document.querySelectorAll("[data-i18n-aria]").forEach((el) => { el.setAttribute("aria-label", t(el.dataset.i18nAria)); });
+  document.querySelectorAll(".lang button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === LANG)));
+  $("show").textContent = $("pw").type === "password" ? t("show") : t("hide");
+  $("quit").placeholder = HASHES.hashedQuitPassword ? t("quit_ph_set") : t("quit_ph");
+  document.querySelectorAll(".tab").forEach((b) => { b.querySelector(".tn").textContent = tabName(SCHEMA.tabs.find((x) => x[0] === b.dataset.tab)); });
+  msg("");
+  if ($("tabs").children.length) { if ($("q").value.trim()) $("q").dispatchEvent(new Event("input")); else showTab(curTab); }
+}
+document.querySelectorAll(".lang button").forEach((b) => b.addEventListener("click", () => {
+  LANG = b.dataset.lang;
+  try { localStorage.setItem("seb-cfg-lang", LANG); } catch (e) { /* facoltativo */ }
+  applyLang();
+}));
+
+/* ---- apertura di un .seb esistente ---- */
+function parseVal(el) {
+  switch (el.tagName) {
+    case "dict": return parseDict(el);
+    case "array": return [...el.children].map(parseVal);
+    case "string": return el.textContent;
+    case "integer": return parseInt(el.textContent, 10);
+    case "real": return parseFloat(el.textContent);
+    case "true": return true;
+    case "false": return false;
+    default: return { __raw: new XMLSerializer().serializeToString(el) };
+  }
+}
+function dictPairs(el) {
+  const ch = [...el.children], out = [];
+  for (let i = 0; i + 1 < ch.length; i += 2) out.push([ch[i].textContent, ch[i + 1]]);
+  return out;
+}
+function parseDict(el) { const o = {}; for (const [k, v] of dictPairs(el)) o[k] = parseVal(v); return o; }
+function coerce(e, v) {
+  if (e.t === "bool") return v === true || v === 1;
+  if (e.t === "int" || e.t === "float") return Number(typeof v === "object" ? 0 : v) || 0;
+  return v == null || typeof v === "object" ? "" : String(v);
+}
+
+function applyFile(xml) {
+  const doc = new DOMParser().parseFromString(xml, "text/xml");
+  const root = doc.querySelector("plist > dict");
+  if (doc.querySelector("parsererror") || !root) throw { code: "format" };
+  resetState(false);
+  extraOn = false;
+  for (const [k, vEl] of dictPairs(root)) {
+    const e = BYKEY[k];
+    if (k === "sebConfigPurpose") { PURPOSE = parseInt(vEl.textContent, 10) || 0; continue; }
+    if (e) {
+      const v = parseVal(vEl);
+      if (e.t === "pw") { if (typeof v === "string" && v) { HASHES[k] = v; touched.add(k); } }
+      else { S[k] = coerce(e, v); if (k === "startURL" ? S[k] !== "" : true) touched.add(k); }
+    } else if (ROWKEYS[k] && vEl.tagName === "array") {
+      const name = ROWKEYS[k];
+      LISTS[name].rows = parseVal(vEl).filter(isObj).map((r) => normRow(LISTDEF[name], r));
+    } else if (STRKEYS[k] && vEl.tagName === "array") {
+      STRLISTS[STRKEYS[k]].lines = parseVal(vEl).filter((x) => typeof x === "string");
+    } else if (k === "proxies" && vEl.tagName === "dict") {
+      PROXY.v = Object.assign(PROXY0(), parseDict(vEl)); PROXY.on = true;
+    } else if (k === "sebServerConfiguration" && vEl.tagName === "dict") {
+      SEBSRV.v = Object.assign(SEBSRV0(), parseDict(vEl)); SEBSRV.on = true;
+    } else PASSTHRU.push([k, { __raw: new XMLSerializer().serializeToString(vEl) }]);
+  }
+}
+
+let pendingFile = null;
+async function tryLoad(bytes, pw) {
+  try {
+    const r = await readSeb(bytes, pw);
+    applyFile(r.xml);
+    pendingFile = null; $("loadpw").hidden = true; $("loadpwin").value = "";
+    $("enc").checked = r.enc; syncPw(); $("pw").value = r.enc ? pw : "";
+    refreshAll();
+    if (!$("advon").checked) { $("advon").checked = true; $("advon").dispatchEvent(new Event("change")); }
+    const n = touched.size + Object.keys(HASHES).length + Object.values(LISTS).reduce((a, l) => a + l.rows.length, 0) + (PROXY.on ? 1 : 0) + (SEBSRV.on ? 1 : 0) + Object.values(STRLISTS).filter((l) => l.lines.length).length + PASSTHRU.length;
+    msg(t("m_opened", n) + (PURPOSE === 1 ? t("m_purpose") : ""), "ok");
+  } catch (e) {
+    if (e && e.code === "need-password") { pendingFile = bytes; $("loadpw").hidden = false; $("loadpwin").focus(); msg(t("m_needpw")); }
+    else if (e && e.code === "password") msg(t("m_badpw"), "err");
+    else if (e && e.code === "cert") msg(t("m_cert"), "err");
+    else msg(t("m_badfile"), "err");
+  }
+}
+$("openbtn").addEventListener("click", () => $("openfile").click());
+$("openfile").addEventListener("change", async () => {
+  const f = $("openfile").files[0]; $("openfile").value = "";
+  if (!f) return;
+  tryLoad(new Uint8Array(await f.arrayBuffer()), null);
+});
+$("loadpwgo").addEventListener("click", () => { if (pendingFile) tryLoad(pendingFile, $("loadpwin").value); });
+$("loadpwin").addEventListener("keydown", (ev) => { if (ev.key === "Enter") { ev.preventDefault(); $("loadpwgo").click(); } });
+
+/* ---- salvataggio ---- */
+function syncPw() { $("pwrow").hidden = !$("enc").checked; }
+$("enc").addEventListener("change", syncPw);
+syncPw();
+
+$("show").addEventListener("click", () => {
+  const p = $("pw"), on = p.type === "password";
+  p.type = on ? "text" : "password";
+  $("show").textContent = on ? t("hide") : t("show");
+  $("show").setAttribute("aria-pressed", String(on));
+});
+
+async function collect(url) {
+  const out = [], seen = new Set();
+  const put = (k, v, t) => { if (!seen.has(k)) { seen.add(k); out.push([k, v, t]); } };
+  put("startURL", url);
+  put("sebConfigPurpose", PURPOSE);
+  for (const e of SCHEMA.items) {
+    if (e.k === "startURL" || (!touched.has(e.k) && !HASHES[e.k])) continue;
+    let v = S[e.k];
+    if (e.t === "pw") { if (v) v = await sha256hex(v); else if (HASHES[e.k]) v = HASHES[e.k]; else continue; }
+    else if (e.t === "string" && v === "" && e.d === "") continue;
+    put(e.k, v, e.t === "float" ? "float" : null);
+  }
+  for (const k of Object.keys(BASE)) if (!seen.has(k) && !(BYKEY[k])) put(k, BASE[k]);
+  if (extraOn) for (const [k, v] of EXTRA) put(k, v);
+  for (const [name, L] of Object.entries(LISTS)) {
+    let rows = L.rows;
+    if (name === "certs") rows = rows.filter((r) => r.certificateData && r.certificateData.__raw);
+    if (name === "additional") rows = rows.map((r) => (r.URL && !r.url ? { ...r, url: r.URL } : r));
+    if (rows.length) put(L.key, rows);
+  }
+  for (const L of Object.values(STRLISTS)) if (L.lines.length) put(L.key, L.lines);
+  if (PROXY.on) put("proxies", PROXY.v);
+  if (SEBSRV.on) put("sebServerConfiguration", SEBSRV.v);
+  for (const [k, v] of PASSTHRU) put(k, v);
+  return out;
+}
+
+async function deliver(bytes) {
+  let dl = null;
+  try { dl = window.claude && (await claude.use("downloads")); } catch (e) { dl = null; }
+  if (dl) {
+    try {
+      await dl.save({ filename: t("fname"), data: bytes });
+      return t("m_saved", t("fname"));
+    } catch (e) {
+      if (e && e.code === "rejected_extension") {
+        await dl.save({ filename: t("fname") + ".txt", data: bytes });
+        return t("m_saved_txt", t("fname"));
+      }
+      throw e;
+    }
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([bytes], { type: "application/octet-stream" }));
+  a.download = t("fname");
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  return t("m_created", t("fname"));
+}
+
+$("f").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const raw = $("url").value.trim();
+  let u;
+  try { u = new URL(raw); if (!/^https?:$/.test(u.protocol)) throw 0; }
+  catch (e) { msg(t("m_url"), "err"); $("url").focus(); return; }
+  const useEnc = $("enc").checked, pw = $("pw").value;
+  if (useEnc && !pw) { msg(t("m_pw"), "err"); $("pw").focus(); return; }
+  $("go").disabled = true; msg("");
+  try {
+    const bytes = await makeSeb(await collect(toViewForm(u.href)), useEnc ? pw : null);
+    msg(await deliver(bytes), "ok");
+  } catch (e) {
+    if (e && e.code === "declined") msg(t("m_cancel"), "");
+    else msg(t("m_fail"), "err");
+  } finally { $("go").disabled = false; }
+});
+applyLang();
+</script>

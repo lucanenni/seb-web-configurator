@@ -1,0 +1,12 @@
+{
+  "name": "seb-web-configurator",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MPL-2.0",
+  "description": "Web configurator for Safe Exam Browser (.seb) files / Configuratore web per file .seb di Safe Exam Browser",
+  "scripts": {
+    "schema": "python3 tools/extract_schema.py --seb-win ../seb-win-refactoring --seb-mac ../seb-mac",
+    "build": "python3 tools/build.py",
+    "test": "node --test tests/"
+  }
+}
